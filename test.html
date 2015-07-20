@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+    <script id="test-template" type="template">
+        <div id="test-{{index}}" dc-repeat = 'item in testObjs' dc-if="index === 1">
+            {{text}}
+            <div data-id="whatever">
+                <table dc-class="{'hide': hide, 'party': color === 'red' && fontWeight === 'bold'}">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <a style="color:{{color}}; font-weight: {{fontWeight}}" dc-style="{'margin-left': marginLeft, 'margin-top': marginTop}" dc-attr="{'href': href, 'target': href ? '_blank': ''}">{{text2}}</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="div-{{index}}" dc-click="party(text, color)">
+                {{text3}}
+            </div>
+            <input dc-model="inputText">
+            <textarea dc-model="inputText"></textarea>
+            <div dc-include="#test-include"></div>
+        </div>
+
+    </script>
+
+    <script id="test-include" type="template">
+        <div style="color: {{color}}">
+            {{text4}}
+        </div>
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="base/js/subclass.js"></script>
+    <script src="base/js/view_parser/third_party/observe.js" type="text/javascript"></script>
+    <script src="base/js/view_parser/third_party/parser.js"></script>
+    <script src="base/js/view_parser/view-parser.js"></script>
+    <script src="base/js/view_parser/view-parser-parse.js"></script>
+    <script src="base/js/view_parser/view-parser-compile.js"></script>
+    <script src="base/js/app.js" type="text/javascript"></script>
+    <script src="base/js/base.js" type="text/javascript"></script>
+    <script src="base/js/view_parser/directives/directive.js"></script>
+    <script src="base/js/view_parser/directives/directive-class.js"></script>
+    <script src="base/js/view_parser/directives/directive-style.js"></script>
+    <script src="base/js/view_parser/directives/directive-attr.js"></script>
+    <script src="base/js/view_parser/directives/directive-listeners.js"></script>
+    <script src="base/js/view_parser/directives/directive-model.js"></script>
+    <script src="base/js/view_parser/directives/directive-include.js"></script>
+    <script src="base/js/view_parser/directives/directive-if.js"></script>
+
+    <script src="testApp/testApp.js"></script>
+</body>
+</html>
