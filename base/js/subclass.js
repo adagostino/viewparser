@@ -63,14 +63,17 @@
       // All construction is actually done in this method
       // this is where it kinda sucks -- instantiating new parent/child to make use
       // of their closures
+      /*
       var instance = _superize(new parent(), new child(), instanceProperties);
       for (var name in instance) {
         this[name] = instance[name];
       }
-
+      */
       if (!_initializing && this.init) {
-        this.__beforeInit && this.__beforeInit.apply(this, arguments);
-        this.init.apply(this, arguments);
+        try {
+          this.__beforeInit && this.__beforeInit.apply(this, arguments);
+          this.init.apply(this, arguments);
+        } catch(err) {};
       }
     };
 

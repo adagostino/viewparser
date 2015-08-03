@@ -1,5 +1,7 @@
 (function(global){
   global = global || window;
+	var viewParser = global.viewParser;
+
 	var $parse = global.ngParser;
   // Regular Expressions for parsing tags and attributes
 	var startTag = /^<([-A-Za-z0-9_:]+)((?:\s+[-A-Za-z0-9_,:;\'\"\)\(]+(?:\s*=\s*(?:(?:"[^"]*")|(?:'[^']*')|[^>\s]+))?)*)\s*(\/?)>/,
@@ -9,7 +11,7 @@
 			curlyReg = /({|})/g,
 			idReg = /^\s*\#/,
 			atReg = /^\s*\@/,
-			isNotWordReg = /[^\w]/g;
+			isNotWordReg = /^\s*[^\w\$]]/g;
 
   var makeMap = function (str) {
     var obj = {}, items = str.split(",");
@@ -179,31 +181,28 @@
 
   };
 
-	var _templateMap = {};
-
-	viewParser.prototype.getTemplate = function(id) {
-		return _templateMap[id];
-	};
-
-	viewParser.prototype.getTemplateFromEl = function(el) {
-		return this.getTemplate(el.__templateId);
-	};
-
 	viewParser.prototype._createEl = function(tag, attrs, unary) {
 		var el =  {
 			'id': this.generateId(),
 			'tag': tag ? tag.toLowerCase() : 'documentfragment',
 			'unary': unary || '',
+			'isTemplate': 1,
 			'children': [],
-			'attributes': []
+			'attributes': [],
+			'views': []
 		};
-		if (tag === 'textnode') {
-			el.text = attrs;
-		} else {
-			el.attributes = attrs || [];
+		switch(el.tag) {
+			case 'textnode':
+				/* falls through */
+			case 'comment':
+				el.text = attrs;
+				break;
+			default:
+				el.attributes = attrs || [];
+				break;
 		}
 		this.parseAttributes(el);
-		_templateMap[el.id] = el;
+		this.addTemplateToMap(el);
 		return el;
 	};
 
@@ -226,12 +225,11 @@
 				currEl.children.push(el.id);
 				if (!unary) {
 					path.push(currEl.id);
-					//path.push('children[' + (currEl.children.length - 1) + ']');
 					currEl = el;
 				}
 			}.bind(this),
 			end: function(tag) {
-				currEl = _templateMap[path.pop()];
+				currEl = this.getTemplate(path.pop());
 			}.bind(this),
 			chars: function(text) {
 				var a = this.parseText(text);
@@ -240,8 +238,9 @@
 					currEl.children.push(el.id);
 				}
 			}.bind(this),
-			comment: function() {
-
+			comment: function(comment) {
+				var el = this._createEl('comment', comment);
+				currEl.children.push(el.id);
 			}.bind(this)
 		});
 
@@ -304,29 +303,50 @@
 
 	viewParser.prototype.parseAttributes = function(el) {
 		var attrs = el.attributes;
-		var a = [];
+		var a = [],
+				c = null,
+				d = [];
 		for (var i=0; i<attrs.length; i++) {
-			var attr = attrs[i];
-			var directive = this.parseDirective(attr.name);
-			var presidence = false;
+			var attr = attrs[i],
+					directive = this.parseDirective(attr.name),
+					controller = this.parseController(attr);
 			if (directive) {
 				attr.directive = directive;
-				presidence = !!directive.value.presidence;
+				!!directive.value.presidence ? d.unshift(attr) : d.push(attr);
+			} else if (controller) {
+				// Can only have one controller per element.
+				attr.controller = controller;
+				c = attr;
 			} else {
 				attr.parsedValue = this.parseText(attr.value);
 			}
-			presidence ? a.unshift(attr) : a.push(attr);
+			a.push(attr);
 		}
 
-		for (var i=0; i< a.length; i++) {
-			if (a[i].directive) {
-				// Do this here instead of parseDirective b/c we don't want to affect the stored directive object, only this
-				// instance of the directive
-				var template = this.getDirectiveTemplate(a[i].directive.value, attrs);
-				template && el.children.push(this.parseTemplate(template).id);
-			}
+		for (var i=0; i< d.length; i++) {
+			// Do this here instead of parseDirective b/c we don't want to affect the stored directive object, only this
+			// instance of the directive
+			var template = this.getDirectiveTemplate(d[i].directive.value, attrs);
+			template && el.children.push(this.parseTemplate(template).id);
+		}
+		if (c) {
+			d.unshift(c);
 		}
 		el.attributes = a;
+		el.views = d;
+	};
+
+	viewParser.prototype.parseController = function(attr) {
+		if (attr.name.toLowerCase() !== 'dc-controller') return;
+		var controller = this.controllers[attr.value];
+		if (!controller) {
+			console.warn('could not find controller:', attr.value,'Did you forget to add it?');
+			return
+		}
+		return {
+			'name': 'controller',
+			'value': controller
+		}
 	};
 
 	viewParser.prototype.parseDirective = function(directiveName) {

@@ -3,10 +3,15 @@
 
   var base = function(){};
 
+  base.prototype.__beforeInit = function() {
+    this.viewParser = $app.viewParser;
+  };
+
   base.prototype.$watch = function(path, fn) {
     if ($.isArray(path)) return this.$compoundWatch(path, fn);
     var observer = new PathObserver(this, path),
         callback = function(newValue, oldValue) {
+          //console.log(arguments);
           fn.apply(this, arguments);
           Platform.performMicrotaskCheckpoint();
         }.bind(this);
@@ -20,8 +25,8 @@
 
   base.prototype.$watchArray = function(path, fn) {
     var arr = Path.get(path).getValueFrom(this),
-        callback = function() {
-          fn.apply(this, arguments);
+        callback = function(splices) {
+          fn.call(this, {'splices': splices});
           Platform.performMicrotaskCheckpoint();
         }.bind(this),
         cancelPathObserver = this.$watch(path, fn),
@@ -33,6 +38,10 @@
       observer.close();
       cancelPathObserver();
     }
+  };
+
+  base.prototype.$watchObject = function(path, fn) {
+
   };
 
   base.prototype.$compoundWatch = function(paths, fn) {
@@ -80,7 +89,7 @@
 
   base.prototype.$parse = function(o) {
     var parseFunc = ngParser(o);
-    var paths = this.viewParser ? this.viewParser.getPaths(parseFunc.lexer.lex(o)) : null;
+    var paths = this.viewParser.getPaths(parseFunc.lexer.lex(o));
     return {
       'parseFunc': parseFunc,
       'paths': paths
@@ -93,10 +102,9 @@
     // make sure to add $scope to the paths.
     for (var i=0; i<opts.paths.length; i++) {
       if (!$scopeReg.test(opts.paths[i])) {
-        opts.paths[i] = '$scope.' + opts.paths[i];
+        opts.paths.push('$scope.' + opts.paths[i]);
       }
     }
-
     var cb = function() {
       var tmp = this._parseFunc;
       this._parseFunc = opts.parseFunc;
@@ -112,7 +120,7 @@
 
   };
 
-  base.prototype.listenTo = function(event, callback) {
+  base.prototype.$listenTo = function(event, callback) {
     if (!this.viewParser) {
       console.warn('Trying to listen to event:', event, 'on an object that does not have a view parser.');
       return;
@@ -123,7 +131,7 @@
   base.prototype._isAdmin = false;
 
   base.prototype.addObserver = function(observers) {
-    this.viewParser && this.viewParser.addObserverToEl(this.el, observers);
+    this.viewParser.addObserverToEl(this.el, observers);
   };
 
   $app.add(subClass, base, 'base');

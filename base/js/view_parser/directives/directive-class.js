@@ -7,7 +7,7 @@ var subClass = 'directive';
   directive.prototype.init = function(attrs){
     this.regexs = null;
 
-    this.$parseAndWatch(directiveName, function() {
+    this.$parseAndWatch(attrs[directiveName], function() {
       var o = this._parseFunc(this.$scope);
       if (!this.regexs) {
         this.regexs = {};

@@ -3,36 +3,98 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title></title>
+    <style>
+        .item {
+            display: inline-block;
+            position: relative;
+            vertical-align: top;
+        }
+
+        .item-img-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .item-img-container:hover .item-header {
+            transform: translate(0, 0);
+        }
+
+        .item-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: auto;
+        }
+
+        .item-header {
+            position: absolute;
+            bottom: 0px;
+            left: 0px;
+            width: 100%;
+            color: white;
+            background: black;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            transform: translate(0, 100%);
+            transition: transform 0.218s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+    </style>
 </head>
 <body>
+    <div dc-app="testApp"></div>
+
+    <script id="test-app" type="template">
+        <div dc-controller="test-controller">
+            <div>Num Cols: <input dc-model="numCols"> Image Width: <input dc-model="thumbWidth"> Image Height: <input dc-model="thumbHeight"> Gutter: <input dc-model="gutter"></div>
+            <div>
+                <div class="item" dc-repeat="item in testObjs">
+                    <div class="item-img-container">
+                        <img class="item-img" src="{{item.src}}">
+                        <div class="item-header">Image {{$index}}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script id="test-template2" type="template">
+        <div id="test-{{$index}}" dc-repeat = 'item in testObjs' dc-style="{'outline': $index%2 ? '1px solid blue' : ''}" style="display: inline-block" >
+            {{item.text}} {{$index}}
+        </div>
+    </script>
 
     <script id="test-template" type="template">
-        <div id="test-{{index}}" dc-repeat = 'item in testObjs' dc-if="index === 1">
-            {{text}}
-            <div data-id="whatever">
-                <table dc-class="{'hide': hide, 'party': color === 'red' && fontWeight === 'bold'}">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <a style="color:{{color}}; font-weight: {{fontWeight}}" dc-style="{'margin-left': marginLeft, 'margin-top': marginTop}" dc-attr="{'href': href, 'target': href ? '_blank': ''}">{{text2}}</a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+        <div dc-controller="test-controller">
+            <div id="test-{{$index}}" dc-repeat = 'item in testObjs' dc-style="{'outline': $index%2 ? '1px solid blue' : ''}" style="display: inline-block" >
+                {{item.text}} {{$index}}
+                <div data-id="whatever">
+                    <table dc-class="{'hide': item.hide, 'party': item.color === 'red' && item.fontWeight === 'bold'}">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <a style="color:{{item.color}}; font-weight: {{item.fontWeight}}" dc-style="{'margin-left': item.marginLeft, 'margin-top': item.marginTop}" dc-attr="{'href': item.href, 'target': item.href ? '_blank': ''}">{{item.text2}}</a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="if-{{$index}}" dc-class="{'isShown': $index%2}" dc-if="$index%2">
+                    <div id="div-{{$index}}" dc-click="item.party($index, item.color)">
+                        {{item.text3}} {{$index}}
+                    </div>
+                    <input dc-model="item.inputText">
+                </div>
+                <textarea dc-model="item.inputText"></textarea>
+                <div dc-include="#test-include"></div>
             </div>
-            <div id="div-{{index}}" dc-click="party(text, color)">
-                {{text3}}
-            </div>
-            <input dc-model="inputText">
-            <textarea dc-model="inputText"></textarea>
-            <div dc-include="#test-include"></div>
         </div>
-
     </script>
 
     <script id="test-include" type="template">
-        <div style="color: {{color}}">
-            {{text4}}
+        <div style="color: {{item.color}}">
+            {{item.text4}} {{$index}}
         </div>
     </script>
 
@@ -40,11 +102,15 @@
     <script src="base/js/subclass.js"></script>
     <script src="base/js/view_parser/third_party/observe.js" type="text/javascript"></script>
     <script src="base/js/view_parser/third_party/parser.js"></script>
+    <script src="base/js/view_parser/virtual/element.js"></script>
     <script src="base/js/view_parser/view-parser.js"></script>
+    <script src="base/js/view_parser/view-parser-garbage.js"></script>
     <script src="base/js/view_parser/view-parser-parse.js"></script>
     <script src="base/js/view_parser/view-parser-compile.js"></script>
-    <script src="base/js/app.js" type="text/javascript"></script>
-    <script src="base/js/base.js" type="text/javascript"></script>
+    <script src="base/js/app.js"></script>
+    <script src="base/js/base.js"></script>
+    <script src="base/js/view.js"></script>
+    <script src="base/js/view_parser/controllers/controller.js"></script>
     <script src="base/js/view_parser/directives/directive.js"></script>
     <script src="base/js/view_parser/directives/directive-class.js"></script>
     <script src="base/js/view_parser/directives/directive-style.js"></script>
@@ -53,7 +119,9 @@
     <script src="base/js/view_parser/directives/directive-model.js"></script>
     <script src="base/js/view_parser/directives/directive-include.js"></script>
     <script src="base/js/view_parser/directives/directive-if.js"></script>
+    <script src="base/js/view_parser/directives/directive-repeat.js"></script>
 
     <script src="testApp/testApp.js"></script>
+    <script src="testApp/test-controller.js"></script>
 </body>
 </html>

@@ -94,7 +94,7 @@ var subClass = 'directive';
           func.apply(_getScopeOfFunction(this.$scope, funcStr), this.getParamsFromScope(params));
           Platform.performMicrotaskCheckpoint();
         }.bind(this);
-        this.removeEventListener = this.listenTo(_event, callback);
+        this.removeEventListener = this.$listenTo(_event, callback);
         return callback;
       };
 

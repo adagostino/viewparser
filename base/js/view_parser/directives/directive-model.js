@@ -8,16 +8,19 @@ var subClass = 'directive';
     var fn = this.el.tagName === 'INPUT' || this.el.tagName === 'TEXTAREA' ? 'value' : 'innerHTML',
         model = attrs[directiveName];
 
-    this.$parseAndWatch(model, function() {
-      var val = this._parseFunc(this.$scope);
+    this.$watch('$scope.' + model, function(val) {
       if (this.el[fn] !== val) this.el[fn] = (val || '');
     });
 
-    var callback = function(){1
+    var callback = function(){
       Path.get(model).setValueFrom(this.$scope, this.el[fn]);
       Platform.performMicrotaskCheckpoint();
     }.bind(this);
-    this.removeEventListener = this.listenTo('input', callback);
+
+    this.$listenTo('input', callback);
+
+    var val = Path.get(model).getValueFrom(this.$scope);
+    if (this.el[fn] !== val) this.el[fn] = (val || '');
   };
 
   $app.addDirective(subClass, {

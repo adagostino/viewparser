@@ -7,7 +7,7 @@
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
 
-(function(global) {
+(function (global) {
   'use strict';
 
   var testingExposeCycleCount = global.testingExposeCycleCount;
@@ -15,7 +15,7 @@
   // Detect and do basic sanity checking on Object/Array.observe.
   function detectObjectObserve() {
     if (typeof Object.observe !== 'function' ||
-        typeof Array.observe !== 'function') {
+      typeof Array.observe !== 'function') {
       return false;
     }
 
@@ -40,10 +40,10 @@
       return false;
 
     if (records[0].type != 'add' ||
-        records[1].type != 'update' ||
-        records[2].type != 'delete' ||
-        records[3].type != 'splice' ||
-        records[4].type != 'splice') {
+      records[1].type != 'update' ||
+      records[2].type != 'delete' ||
+      records[3].type != 'splice' ||
+      records[4].type != 'splice') {
       return false;
     }
 
@@ -91,9 +91,9 @@
     return obj === Object(obj);
   }
 
-  var numberIsNaN = global.Number.isNaN || function(value) {
-    return typeof value === 'number' && global.isNaN(value);
-  }
+  var numberIsNaN = global.Number.isNaN || function (value) {
+      return typeof value === 'number' && global.isNaN(value);
+    }
 
   function areSameValue(left, right) {
     if (left === right)
@@ -105,15 +105,17 @@
   }
 
   var createObject = ('__proto__' in {}) ?
-    function(obj) { return obj; } :
-    function(obj) {
+    function (obj) {
+      return obj;
+    } :
+    function (obj) {
       var proto = obj.__proto__;
       if (!proto)
         return obj;
       var newObject = Object.create(proto);
-      Object.getOwnPropertyNames(obj).forEach(function(name) {
+      Object.getOwnPropertyNames(obj).forEach(function (name) {
         Object.defineProperty(newObject, name,
-                             Object.getOwnPropertyDescriptor(obj, name));
+          Object.getOwnPropertyDescriptor(obj, name));
       });
       return newObject;
     };
@@ -128,7 +130,7 @@
 
     var code = char.charCodeAt(0);
 
-    switch(code) {
+    switch (code) {
       case 0x5B: // [
       case 0x5D: // ]
       case 0x2E: // .
@@ -231,7 +233,8 @@
     }
   }
 
-  function noop() {}
+  function noop() {
+  }
 
   function parsePath(path) {
     var keys = [];
@@ -239,7 +242,7 @@
     var c, newChar, key, type, transition, action, typeMap, mode = 'beforePath';
 
     var actions = {
-      push: function() {
+      push: function () {
         if (key === undefined)
           return;
 
@@ -247,7 +250,7 @@
         key = undefined;
       },
 
-      append: function() {
+      append: function () {
         if (key === undefined)
           key = newChar
         else
@@ -261,7 +264,7 @@
 
       var nextChar = path[index + 1];
       if ((mode == 'inSingleQuote' && nextChar == "'") ||
-          (mode == 'inDoubleQuote' && nextChar == '"')) {
+        (mode == 'inDoubleQuote' && nextChar == '"')) {
         index++;
         newChar = nextChar;
         actions.append();
@@ -361,7 +364,7 @@
     __proto__: [],
     valid: true,
 
-    toString: function() {
+    toString: function () {
       var pathString = '';
       for (var i = 0; i < this.length; i++) {
         var key = this[i];
@@ -375,7 +378,7 @@
       return pathString;
     },
 
-    getValueFrom: function(obj, directObserver) {
+    getValueFrom: function (obj, directObserver) {
       for (var i = 0; i < this.length; i++) {
         if (obj == null)
           return;
@@ -384,7 +387,7 @@
       return obj;
     },
 
-    iterateObjects: function(obj, observe) {
+    iterateObjects: function (obj, observe) {
       for (var i = 0; i < this.length; i++) {
         if (i)
           obj = obj[this[i - 1]];
@@ -394,7 +397,7 @@
       }
     },
 
-    compiledGetValueFromFn: function() {
+    compiledGetValueFromFn: function () {
       var str = '';
       var pathString = 'obj';
       str += 'if (obj != null';
@@ -414,7 +417,7 @@
       return new Function('obj', str);
     },
 
-    setValueFrom: function(obj, value) {
+    setValueFrom: function (obj, value) {
       if (!this.length)
         return false;
 
@@ -434,7 +437,8 @@
 
   var invalidPath = new Path('', constructorIsPrivate);
   invalidPath.valid = false;
-  invalidPath.getValueFrom = invalidPath.setValueFrom = function() {};
+  invalidPath.getValueFrom = invalidPath.setValueFrom = function () {
+  };
 
   var MAX_DIRTY_CHECK_CYCLES = 1000;
 
@@ -457,8 +461,8 @@
 
   function diffIsEmpty(diff) {
     return objectIsEmpty(diff.added) &&
-           objectIsEmpty(diff.removed) &&
-           objectIsEmpty(diff.changed);
+      objectIsEmpty(diff.removed) &&
+      objectIsEmpty(diff.changed);
   }
 
   function diffObjectFromOldObject(object, oldObject) {
@@ -499,6 +503,7 @@
   }
 
   var eomTasks = [];
+
   function runEOMTasks() {
     if (!eomTasks.length)
       return false;
@@ -510,16 +515,16 @@
     return true;
   }
 
-  var runEOM = hasObserve ? (function(){
-    return function(fn) {
+  var runEOM = hasObserve ? (function () {
+    return function (fn) {
       return Promise.resolve().then(fn);
     }
   })() :
-  (function() {
-    return function(fn) {
-      eomTasks.push(fn);
-    };
-  })();
+    (function () {
+      return function (fn) {
+        eomTasks.push(fn);
+      };
+    })();
 
   var observedObjectCache = [];
 
@@ -535,7 +540,7 @@
     }
 
     return {
-      open: function(obs) {
+      open: function (obs) {
         if (observer)
           throw Error('ObservedObject in use');
 
@@ -545,19 +550,19 @@
         observer = obs;
         first = false;
       },
-      observe: function(obj, arrayObserve) {
+      observe: function (obj, arrayObserve) {
         object = obj;
         if (arrayObserve)
           Array.observe(object, callback);
         else
           Object.observe(object, callback);
       },
-      deliver: function(discard) {
+      deliver: function (discard) {
         discardRecords = discard;
         Object.deliverChangeRecords(callback);
         discardRecords = false;
       },
-      close: function() {
+      close: function () {
         observer = undefined;
         Object.unobserve(object, callback);
         observedObjectCache.push(this);
@@ -622,8 +627,8 @@
       for (var i = 0; i < recs.length; i++) {
         var rec = recs[i];
         if (rec.object !== rootObj ||
-            rootObjProps[rec.name] ||
-            rec.type === 'setPrototype') {
+          rootObjProps[rec.name] ||
+          rec.type === 'setPrototype') {
           return false;
         }
       }
@@ -652,17 +657,19 @@
 
     var record = {
       objects: objects,
-      get rootObject() { return rootObj; },
+      get rootObject() {
+        return rootObj;
+      },
       set rootObject(value) {
         rootObj = value;
         rootObjProps = {};
       },
-      open: function(obs, object) {
+      open: function (obs, object) {
         observers.push(obs);
         observerCount++;
         obs.iterateObjects_(observe);
       },
-      close: function(obs) {
+      close: function (obs) {
         observerCount--;
         if (observerCount > 0) {
           return;
@@ -714,7 +721,7 @@
   }
 
   Observer.prototype = {
-    open: function(callback, target) {
+    open: function (callback, target) {
       if (this.state_ != UNOPENED)
         throw Error('Observer has already been opened.');
 
@@ -726,7 +733,7 @@
       return this.value_;
     },
 
-    close: function() {
+    close: function () {
       if (this.state_ != OPENED)
         return;
 
@@ -738,24 +745,24 @@
       this.state_ = CLOSED;
     },
 
-    deliver: function() {
+    deliver: function () {
       if (this.state_ != OPENED)
         return;
 
       dirtyCheck(this);
     },
 
-    report_: function(changes) {
+    report_: function (changes) {
       try {
         this.callback_.apply(this.target_, changes);
       } catch (ex) {
         Observer._errorThrownDuringCallback = true;
         console.error('Exception caught during observer callback: ' +
-                       (ex.stack || ex));
+          (ex.stack || ex));
       }
     },
 
-    discardChanges: function() {
+    discardChanges: function () {
       this.check_(undefined, true);
       return this.value_;
     }
@@ -785,7 +792,7 @@
 
   global.Platform = global.Platform || {};
 
-  global.Platform.performMicrotaskCheckpoint = function() {
+  global.Platform.performMicrotaskCheckpoint = function () {
     if (runningMicrotaskCheckpoint)
       return;
 
@@ -824,7 +831,7 @@
   };
 
   if (collectObservers) {
-    global.Platform.clearObservers = function() {
+    global.Platform.clearObservers = function () {
       allObservers = [];
     };
   }
@@ -840,27 +847,28 @@
 
     arrayObserve: false,
 
-    connect_: function(callback, target) {
+    connect_: function (callback, target) {
       if (hasObserve) {
         this.directObserver_ = getObservedObject(this, this.value_,
-                                                 this.arrayObserve);
+          this.arrayObserve);
       } else {
         this.oldObject_ = this.copyObject(this.value_);
       }
 
     },
 
-    copyObject: function(object) {
+    copyObject: function (object) {
       var copy = Array.isArray(object) ? [] : {};
       for (var prop in object) {
         copy[prop] = object[prop];
-      };
+      }
+      ;
       if (Array.isArray(object))
         copy.length = object.length;
       return copy;
     },
 
-    check_: function(changeRecords, skipChanges) {
+    check_: function (changeRecords, skipChanges) {
       var diff;
       var oldValues;
       if (hasObserve) {
@@ -869,7 +877,7 @@
 
         oldValues = {};
         diff = diffObjectFromChangeRecords(this.value_, changeRecords,
-                                           oldValues);
+          oldValues);
       } else {
         oldValues = this.oldObject_;
         diff = diffObjectFromOldObject(this.value_, this.oldObject_);
@@ -885,7 +893,7 @@
         diff.added || {},
         diff.removed || {},
         diff.changed || {},
-        function(property) {
+        function (property) {
           return oldValues[property];
         }
       ]);
@@ -893,7 +901,7 @@
       return true;
     },
 
-    disconnect_: function() {
+    disconnect_: function () {
       if (hasObserve) {
         this.directObserver_.close();
         this.directObserver_ = undefined;
@@ -902,7 +910,7 @@
       }
     },
 
-    deliver: function() {
+    deliver: function () {
       if (this.state_ != OPENED)
         return;
 
@@ -912,7 +920,7 @@
         dirtyCheck(this);
     },
 
-    discardChanges: function() {
+    discardChanges: function () {
       if (this.directObserver_)
         this.directObserver_.deliver(true);
       else
@@ -934,11 +942,11 @@
 
     arrayObserve: true,
 
-    copyObject: function(arr) {
+    copyObject: function (arr) {
       return arr.slice();
     },
 
-    check_: function(changeRecords) {
+    check_: function (changeRecords) {
       var splices;
       if (hasObserve) {
         if (!changeRecords)
@@ -946,7 +954,7 @@
         splices = projectArraySplices(this.value_, changeRecords);
       } else {
         splices = calcSplices(this.value_, 0, this.value_.length,
-                              this.oldObject_, 0, this.oldObject_.length);
+          this.oldObject_, 0, this.oldObject_.length);
       }
 
       if (!splices || !splices.length)
@@ -960,8 +968,8 @@
     }
   });
 
-  ArrayObserver.applySplices = function(previous, current, splices) {
-    splices.forEach(function(splice) {
+  ArrayObserver.applySplices = function (previous, current, splices) {
+    splices.forEach(function (splice) {
       var spliceArgs = [splice.index, splice.removed.length];
       var addIndex = splice.index;
       while (addIndex < splice.index + splice.addedCount) {
@@ -988,14 +996,14 @@
       return this.path_;
     },
 
-    connect_: function() {
+    connect_: function () {
       if (hasObserve)
         this.directObserver_ = getObservedSet(this, this.object_);
 
       this.check_(undefined, true);
     },
 
-    disconnect_: function() {
+    disconnect_: function () {
       this.value_ = undefined;
 
       if (this.directObserver_) {
@@ -1004,11 +1012,11 @@
       }
     },
 
-    iterateObjects_: function(observe) {
+    iterateObjects_: function (observe) {
       this.path_.iterateObjects(this.object_, observe);
     },
 
-    check_: function(changeRecords, skipChanges) {
+    check_: function (changeRecords, skipChanges) {
       var oldValue = this.value_;
       this.value_ = this.path_.getValueFrom(this.object_);
       if (skipChanges || areSameValue(this.value_, oldValue))
@@ -1018,7 +1026,7 @@
       return true;
     },
 
-    setValue: function(newValue) {
+    setValue: function (newValue) {
       if (this.path_)
         this.path_.setValueFrom(this.object_, newValue);
     }
@@ -1038,7 +1046,7 @@
   CompoundObserver.prototype = createObject({
     __proto__: Observer.prototype,
 
-    connect_: function() {
+    connect_: function () {
       if (hasObserve) {
         var object;
         var needsDirectObserver = false;
@@ -1057,7 +1065,7 @@
       this.check_(undefined, !this.reportChangesOnOpen_);
     },
 
-    disconnect_: function() {
+    disconnect_: function () {
       for (var i = 0; i < this.observed_.length; i += 2) {
         if (this.observed_[i] === observerSentinel)
           this.observed_[i + 1].close();
@@ -1071,7 +1079,7 @@
       }
     },
 
-    addPath: function(object, path) {
+    addPath: function (object, path) {
       if (this.state_ != UNOPENED && this.state_ != RESETTING)
         throw Error('Cannot add paths once started.');
 
@@ -1083,7 +1091,7 @@
       this.value_[index] = path.getValueFrom(object);
     },
 
-    addObserver: function(observer) {
+    addObserver: function (observer) {
       if (this.state_ != UNOPENED && this.state_ != RESETTING)
         throw Error('Cannot add observers once started.');
 
@@ -1094,7 +1102,7 @@
       this.value_[index] = observer.open(this.deliver, this);
     },
 
-    startReset: function() {
+    startReset: function () {
       if (this.state_ != OPENED)
         throw Error('Can only reset while open');
 
@@ -1102,7 +1110,7 @@
       this.disconnect_();
     },
 
-    finishReset: function() {
+    finishReset: function () {
       if (this.state_ != RESETTING)
         throw Error('Can only finishReset after startReset');
       this.state_ = OPENED;
@@ -1111,7 +1119,7 @@
       return this.value_;
     },
 
-    iterateObjects_: function(observe) {
+    iterateObjects_: function (observe) {
       var object;
       for (var i = 0; i < this.observed_.length; i += 2) {
         object = this.observed_[i]
@@ -1120,17 +1128,17 @@
       }
     },
 
-    check_: function(changeRecords, skipChanges) {
+    check_: function (changeRecords, skipChanges) {
       var oldValues;
       for (var i = 0; i < this.observed_.length; i += 2) {
         var object = this.observed_[i];
-        var path = this.observed_[i+1];
+        var path = this.observed_[i + 1];
         var value;
         if (object === observerSentinel) {
           var observable = path;
           value = this.state_ === UNOPENED ?
-              observable.open(this.deliver, this) :
-              observable.discardChanges();
+            observable.open(this.deliver, this) :
+            observable.discardChanges();
         } else {
           value = path.getValueFrom(object);
         }
@@ -1158,7 +1166,9 @@
     }
   });
 
-  function identFn(value) { return value; }
+  function identFn(value) {
+    return value;
+  }
 
   function ObserverTransform(observable, getValueFn, setValueFn,
                              dontPassThroughSet) {
@@ -1174,15 +1184,15 @@
   }
 
   ObserverTransform.prototype = {
-    open: function(callback, target) {
+    open: function (callback, target) {
       this.callback_ = callback;
       this.target_ = target;
       this.value_ =
-          this.getValueFn_(this.observable_.open(this.observedCallback_, this));
+        this.getValueFn_(this.observable_.open(this.observedCallback_, this));
       return this.value_;
     },
 
-    observedCallback_: function(value) {
+    observedCallback_: function (value) {
       value = this.getValueFn_(value);
       if (areSameValue(value, this.value_))
         return;
@@ -1191,22 +1201,22 @@
       this.callback_.call(this.target_, this.value_, oldValue);
     },
 
-    discardChanges: function() {
+    discardChanges: function () {
       this.value_ = this.getValueFn_(this.observable_.discardChanges());
       return this.value_;
     },
 
-    deliver: function() {
+    deliver: function () {
       return this.observable_.deliver();
     },
 
-    setValue: function(value) {
+    setValue: function (value) {
       value = this.setValueFn_(value);
       if (!this.dontPassThroughSet_ && this.observable_.setValue)
         return this.observable_.setValue(value);
     },
 
-    close: function() {
+    close: function () {
       if (this.observable_)
         this.observable_.close();
       this.callback_ = undefined;
@@ -1296,7 +1306,8 @@
   var EDIT_ADD = 2;
   var EDIT_DELETE = 3;
 
-  function ArraySplice() {}
+  function ArraySplice() {
+  }
 
   ArraySplice.prototype = {
 
@@ -1311,8 +1322,8 @@
     // With 1-edit updates, the shortest path would be just to update all seven
     // characters. With 2-edit updates, we delete 4, leave 3, and add 4. This
     // leaves the substring '123' intact.
-    calcEditDistances: function(current, currentStart, currentEnd,
-                                old, oldStart, oldEnd) {
+    calcEditDistances: function (current, currentStart, currentEnd,
+                                 old, oldStart, oldEnd) {
       // "Deletion" columns
       var rowCount = oldEnd - oldStart + 1;
       var columnCount = currentEnd - currentStart + 1;
@@ -1346,7 +1357,7 @@
     // This starts at the final weight, and walks "backward" by finding
     // the minimum previous weight recursively until the origin of the weight
     // matrix.
-    spliceOperationsFromEditDistances: function(distances) {
+    spliceOperationsFromEditDistances: function (distances) {
       var i = distances.length - 1;
       var j = distances[0].length - 1;
       var current = distances[i][j];
@@ -1420,8 +1431,8 @@
      *   l: The length of the current array
      *   p: The length of the old array
      */
-    calcSplices: function(current, currentStart, currentEnd,
-                          old, oldStart, oldEnd) {
+    calcSplices: function (current, currentStart, currentEnd,
+                           old, oldStart, oldEnd) {
       var prefixCount = 0;
       var suffixCount = 0;
 
@@ -1445,20 +1456,20 @@
         while (oldStart < oldEnd)
           splice.removed.push(old[oldStart++]);
 
-        return [ splice ];
+        return [splice];
       } else if (oldStart == oldEnd)
-        return [ newSplice(currentStart, [], currentEnd - currentStart) ];
+        return [newSplice(currentStart, [], currentEnd - currentStart)];
 
       var ops = this.spliceOperationsFromEditDistances(
-          this.calcEditDistances(current, currentStart, currentEnd,
-                                 old, oldStart, oldEnd));
+        this.calcEditDistances(current, currentStart, currentEnd,
+          old, oldStart, oldEnd));
 
       var splice = undefined;
       var splices = [];
       var index = currentStart;
       var oldIndex = oldStart;
       for (var i = 0; i < ops.length; i++) {
-        switch(ops[i]) {
+        switch (ops[i]) {
           case EDIT_LEAVE:
             if (splice) {
               splices.push(splice);
@@ -1501,14 +1512,14 @@
       return splices;
     },
 
-    sharedPrefix: function(current, old, searchLength) {
+    sharedPrefix: function (current, old, searchLength) {
       for (var i = 0; i < searchLength; i++)
         if (!this.equals(current[i], old[i]))
           return i;
       return searchLength;
     },
 
-    sharedSuffix: function(current, old, searchLength) {
+    sharedSuffix: function (current, old, searchLength) {
       var index1 = current.length;
       var index2 = old.length;
       var count = 0;
@@ -1518,12 +1529,12 @@
       return count;
     },
 
-    calculateSplices: function(current, previous) {
+    calculateSplices: function (current, previous) {
       return this.calcSplices(current, 0, current.length, previous, 0,
-                              previous.length);
+        previous.length);
     },
 
-    equals: function(currentValue, previousValue) {
+    equals: function (currentValue, previousValue) {
       return currentValue === previousValue;
     }
   };
@@ -1533,7 +1544,7 @@
   function calcSplices(current, currentStart, currentEnd,
                        old, oldStart, oldEnd) {
     return arraySplice.calcSplices(current, currentStart, currentEnd,
-                                   old, oldStart, oldEnd);
+      old, oldStart, oldEnd);
   }
 
   function intersect(start1, end1, start2, end2) {
@@ -1575,9 +1586,9 @@
         continue;
 
       var intersectCount = intersect(splice.index,
-                                     splice.index + splice.removed.length,
-                                     current.index,
-                                     current.index + current.addedCount);
+        splice.index + splice.removed.length,
+        current.index,
+        current.index + current.addedCount);
 
       if (intersectCount >= 0) {
         // Merge the two splices
@@ -1589,7 +1600,7 @@
 
         splice.addedCount += current.addedCount - intersectCount;
         var deleteCount = splice.removed.length +
-                          current.removed.length - intersectCount;
+          current.removed.length - intersectCount;
 
         if (!splice.addedCount && !deleteCount) {
           // merged splice is a noop. discard.
@@ -1638,7 +1649,7 @@
 
     for (var i = 0; i < changeRecords.length; i++) {
       var record = changeRecords[i];
-      switch(record.type) {
+      switch (record.type) {
         case 'splice':
           mergeSplice(splices, record.index, record.removed.slice(), record.addedCount);
           break;
@@ -1664,16 +1675,17 @@
   function projectArraySplices(array, changeRecords) {
     var splices = [];
 
-    createInitialSplices(array, changeRecords).forEach(function(splice) {
+    createInitialSplices(array, changeRecords).forEach(function (splice) {
       if (splice.addedCount == 1 && splice.removed.length == 1) {
         if (splice.removed[0] !== array[splice.index])
           splices.push(splice);
 
         return
-      };
+      }
+      ;
 
       splices = splices.concat(calcSplices(array, splice.index, splice.index + splice.addedCount,
-                                           splice.removed, 0, splice.removed.length));
+        splice.removed, 0, splice.removed.length));
     });
 
     return splices;
@@ -1697,7 +1709,7 @@
   expose.Observer.observerSentinel_ = observerSentinel; // for testing.
   expose.Observer.hasObjectObserve = hasObserve;
   expose.ArrayObserver = ArrayObserver;
-  expose.ArrayObserver.calculateSplices = function(current, previous) {
+  expose.ArrayObserver.calculateSplices = function (current, previous) {
     return arraySplice.calculateSplices(current, previous);
   };
 
@@ -1707,5 +1719,5 @@
   expose.CompoundObserver = CompoundObserver;
   expose.Path = Path;
   expose.ObserverTransform = ObserverTransform;
-  
+
 })(typeof global !== 'undefined' && global && typeof module !== 'undefined' && module ? global : this || window);

@@ -7,6 +7,7 @@
     this._id = "__vp" + new Date().getTime();
     this._parsedTemplates = {};
     this.directives = {};
+    this.controllers = {};
     this.addDirectives(directives);
     _viewParsers[this._id] = this;
   };
@@ -31,20 +32,27 @@
     return _idCt++;
   };
 
-
-  viewParser.prototype.addDirectives = function(directives) {
-    for (var key in directives) {
-      this.addDirective(directives[key]);
+  viewParser.prototype._addMVC = function(obj, type) {
+    for (var key in obj) {
+      this._addToMVC(obj[key], type);
     }
   };
 
-  viewParser.prototype.addDirective = function(directive) {
+  viewParser.prototype._addToMVC = function(obj, type) {
     // name, directive, template, $scope
-    if (!directive.name) {
-      console.warn('Could not add directive b/c it did not have key: name.', directive);
+    if (!obj.name) {
+      console.warn('Could not add', type,'b/c it did not have key: name.', obj);
       return;
     }
-    this.directives[directive.name] = directive;
+    this[type][obj.name] = obj;
+  };
+
+  viewParser.prototype.addDirectives = function(directives) {
+    this._addMVC(directives, 'directives');
+  };
+
+  viewParser.prototype.addControllers = function(controllers) {
+    this._addMVC(controllers, 'controllers');
   };
 
   viewParser.prototype.getViewParserFromEl = function(el) {
@@ -58,6 +66,8 @@
   viewParser.prototype.init = function() {
 
   };
+
+  viewParser.prototype.textOnly = false;
 
   global.viewParser = viewParser;
 

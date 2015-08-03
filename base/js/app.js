@@ -3,7 +3,7 @@
 
   var _dashesRegex = /-(.)/g,
       _firstLetterRegex = /^./,
-      _hasNonDigitsRegex = /\D+/g;
+      _hasNonDigitsRegex = /\D+/;
 
   var utils = {
     toCamelCase: function(str) {
@@ -15,16 +15,18 @@
     }
   };
 
-  var app = function(){
+  var app = function(){};
+
+  app.prototype.__beforeInit = function() {
     this._framework = {
       'mvc': {},
       'paths': [],
       'directives': {},
+      'controllers': {},
       'pathStr': ''
     };
     this._mvc = {};
     this._classes = {};
-    // name: class
   };
 
   // Add the class to the app.
@@ -90,56 +92,87 @@
     };
   };
 
-  app.prototype.buildDirectives = function() {
-    this._directives = {};
-    for (var key in this._framework.directives) {
-      var directive = Path.get(key).getValueFrom(this._framework.mvc);
-      var name = this._framework.directives[key].name || key;
-      var o = $.extend({}, this._framework.directives[key]);
-      o.directive = directive;
-      this._directives[name] = o;
+  app.prototype._buildMVC = function(type) {
+    var types = type + 's',
+        _types = '_' + types;
+    this[_types] = {};
+    for (var key in this._framework[types]) {
+      var temp = Path.get(key).getValueFrom(this._framework.mvc);
+      var name = this._framework[types][key].name || key;
+      var o = $.extend({}, this._framework[types][key]);
+      o[type] = temp;
+      this[_types][name] = o;
     }
   };
 
-  app.prototype.addDirective = function(subClass, obj) {
+  app.prototype.buildDirectives = function() {
+    this._buildMVC('directive');
+  };
+
+  app.prototype.buildControllers = function() {
+    this._buildMVC('controller');
+  };
+
+  app.prototype._addToMVC = function(subClass, obj, type) {
+    var types = type + 's';
     if (!obj.name) {
       console.warn('Directive must have a name', obj);
       return;
     }
     // Return camelCase version.
     var name = utils.toCamelCase(obj.name);
-    var path = this.add(subClass, obj.directive, name);
-    this._framework.directives[path] = obj;
+    var path = this.add(subClass, obj[type], name);
+    this._framework[types][path] = obj;
+  };
+
+  app.prototype.addDirective = function(subClass, obj) {
+    this._addToMVC(subClass, obj, 'directive');
+  };
+
+  app.prototype.addController = function(subClass, obj) {
+    // Every controller is an isolate scope.
+    if (!obj.$scope) obj.$scope = {};
+    this._addToMVC(subClass, obj, 'controller');
   };
 
   app.prototype.setAdmin = function(isAdmin) {
     this._mvc['base'].prototype._isAdmin = !!isAdmin;
   };
 
-  app.prototype.init = function(framework){
+  app.prototype.init = function(framework, viewParser){
     this._framework = framework;
     this.extendAll();
     this.buildDirectives();
-    this.viewParser = new viewParser(this._directives);
+    this.buildControllers();
+    this.viewParser = viewParser;
+    this.viewParser.addDirectives(this._directives);
+    this.viewParser.addControllers(this._controllers);
+
     return this;
   };
 
 
-  var baseApp = function(){
-    this.viewParser = new viewParser();
-  };
+  var baseApp = function(){};
 
-  baseApp.prototype.addApp = function(name, inputApp) {
-    var base = this;
+  baseApp.prototype.addApp = function(obj) {
+    // Remember to parse out the template and compile it here.
+    var base = this,
+        name = obj.name,
+        template = obj.template,
+        inputApp = obj.app;
     var oldInit = inputApp.prototype.init;
     if (oldInit) {
       inputApp.prototype.init = function() {
-        this._super(base._framework);
+        this._super(base._framework, base.viewParser);
         return oldInit.apply(this, arguments);
       }
     }
     var nApp = __subClass(app, inputApp);
-    this._appClasses[name] = nApp;
+    this._appClasses[name] = {
+      'name': name,
+      'template': template,
+      'app': nApp
+    };
   };
 
   baseApp.prototype.setAdmin = function(isAdmin){
@@ -149,6 +182,7 @@
   };
 
   baseApp.prototype.init = function() {
+    this.viewParser = new viewParser();
     this._appClasses = {};
     this._apps = {};
     this.utils = utils;
@@ -156,8 +190,38 @@
 
   baseApp.prototype.initApps = function() {
     for (var key in this._appClasses) {
-      this._apps[key] = new this._appClasses[key]();
+      this._apps[key] = this.initApp(this._appClasses[key]);
     }
+  };
+
+  baseApp.prototype.initApp = function(appObj) {
+    var inputApp = appObj.app,
+        name = appObj.name,
+        el = document.querySelector('[dc-app="'+ name +'"]');
+    if (!el) {
+      console.warn('Could not find element for dc-app="'+ name + '". Do you think you added it? Make sure your app file has the correct name.');
+      return;
+    }
+    var startTime = new Date().getTime();
+    var textOnly = 0;
+
+    viewParser.prototype.textOnly = !!textOnly;
+    var startTime = new Date().getTime();
+    var template = appObj.template || el.innerHTML,
+        $scope = new inputApp(),
+        child = this.viewParser.compile(template, $scope);
+    // For now let's replace the contents of the app.
+    if (textOnly) {
+      setTimeout(function () {
+        var buildTime = new Date().getTime();
+        console.log(buildTime - startTime);
+        el.innerHTML = child.buildHTML();
+        console.log(new Date().getTime() - buildTime);
+      }, 0);
+    } else {
+      el.appendChild(child);
+    }
+    console.log(new Date().getTime() - startTime);
   };
 
   baseApp = __subClass(app, baseApp);

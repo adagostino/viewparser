@@ -12,11 +12,7 @@ var subClass = 'directive';
         this.styleMap = {};
         for (var key in o) {
           var ccKey = $app.utils.toCamelCase(key);
-          if (this.el.style.hasOwnProperty(ccKey)) {
-            this.styleMap[key] = ccKey;
-          } else {
-            console.warn('You are trying to listen to a style: ', key, 'that does not exist on el:', this.el);
-          }
+          this.styleMap[key] = ccKey;
         }
       }
       this.styleChanged(o);
@@ -34,7 +30,8 @@ var subClass = 'directive';
   };
 
   directive.prototype.addStyle = function(key, value) {
-    this.el.style[key] = $app.utils.isNumber(value) ? value + 'px' : value;
+    value += $app.utils.isNumber(value) ? 'px' : '';
+    this.el.style[key] = value;
   };
 
   directive.prototype.removeStyle = function(key) {
