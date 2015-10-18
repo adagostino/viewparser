@@ -1,8 +1,7 @@
-(function(global) {
-  global = global || window;
+var __className = 'extend';
+$require(__className, function() {
   var _superPattern = /xyz/.test(function () { xyz;}) ? /\b_super\b/ : /.*/,
       _initializing = false;
-
 
   var _superize = function (_super, iChild, properties) {
     // ichild is the instantiated child
@@ -73,16 +72,17 @@
         try {
           this.__beforeInit && this.__beforeInit.apply(this, arguments);
           this.init.apply(this, arguments);
-        } catch(err) {};
+          this.__afterInit && this.__afterInit.apply(this, arguments);
+        } catch(err) {
+          console.error(err);
+        }
       }
-    };
+    }
 
     Class.prototype = proto;
     Class.constructor = Class;
     Class.subClass = arguments.callee;
     return Class;
   };
-
-  global.__subClass = _extend;
-
-})();
+  return _extend;
+});

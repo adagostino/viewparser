@@ -1,0 +1,6 @@
+<div dc-controller="test-controller">
+    <header>This is a more complicated route.</header>
+    <div dc-repeat="item in testItems | limitTo: repeatLimit">
+        <div test-directive item="item" index="$index"></div>
+    </div>
+</div>

@@ -10,6 +10,8 @@
 (function (global) {
   'use strict';
 
+  if (global.Platform) return;
+
   var testingExposeCycleCount = global.testingExposeCycleCount;
 
   // Detect and do basic sanity checking on Object/Array.observe.

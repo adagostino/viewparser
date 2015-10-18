@@ -1,13 +1,11 @@
-var subClass = 'directive';
-(function(subClass) {
-  var directiveName = 'dc-class';
+var __className = 'dc-class';
+$require(__className, ['viewParser', 'extend', 'utils', 'directive'], function(viewParser, extend, utils, Directive) {
+  var ClassDirective = function(){};
 
-  var directive = function(){};
-
-  directive.prototype.init = function(attrs){
+  ClassDirective.prototype.init = function(attrs){
     this.regexs = null;
 
-    this.$parseAndWatch(attrs[directiveName], function() {
+    this.$parseAndWatch(attrs[this.__className], function() {
       var o = this._parseFunc(this.$scope);
       if (!this.regexs) {
         this.regexs = {};
@@ -20,12 +18,12 @@ var subClass = 'directive';
 
   };
 
-  directive.prototype.classChanged = function(o) {
+  ClassDirective.prototype.classChanged = function(o) {
     var elClassStr = this.el.className;
     for (var key in o) {
       elClassStr = o[key] ? this.addClass(key, elClassStr) : this.removeClass(key, elClassStr);
     }
-    elClassStr = $.trim(elClassStr);
+    elClassStr = utils.trim(elClassStr);
     if (elClassStr) {
       this.el.className = elClassStr;
     } else {
@@ -33,19 +31,18 @@ var subClass = 'directive';
     }
   };
 
-  directive.prototype.addClass = function(className, elClassStr) {
+  ClassDirective.prototype.addClass = function(className, elClassStr) {
     if (!elClassStr.match(this.regexs[className])) elClassStr+= elClassStr ? " " + className : className;
     return elClassStr;
   };
 
-  directive.prototype.removeClass = function(className, elClassStr) {
+  ClassDirective.prototype.removeClass = function(className, elClassStr) {
     return elClassStr.replace(this.regexs[className], function(fullMatch, space1, match, space2) {
       return space1 && space2 ? " " : "";
     });
   };
 
-  $app.addDirective(subClass, {
-    'name': directiveName,
-    'directive': directive
+  return viewParser.addDirective({
+    'directive': extend(Directive, ClassDirective)
   });
-})(subClass);
+});

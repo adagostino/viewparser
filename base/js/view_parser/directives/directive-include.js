@@ -1,17 +1,14 @@
-var subClass = 'directive';
-(function(subClass){
-  var directiveName = 'dc-include';
+var __className = 'dc-include';
+$require(__className, ['viewParser', 'extend', 'directive'], function(viewParser, extend, Directive) {
+  var IncludeDirective = function(){};
 
-  var directive = function(){};
-
-  directive.prototype.init = function(attrs) {
+  IncludeDirective.prototype.init = function(attrs) {
     // TODO: variable level includes
 
   };
 
-  $app.addDirective(subClass, {
-    'name': directiveName,
-    'directive': directive,
-    'template': '@' + directiveName
+  return viewParser.addDirective({
+    'directive': extend(Directive, IncludeDirective),
+    'template': '@'
   });
-})(subClass);
+});

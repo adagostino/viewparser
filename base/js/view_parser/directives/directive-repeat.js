@@ -1,189 +1,214 @@
-var subClass = 'directive';
-(function(subClass) {
-  var directiveName = 'dc-repeat';
+var __className = 'dc-repeat';
+$require(__className,
+[
+  'viewParser',
+  'extend',
+  'utils',
+  'scopeTree',
+  'directive'
+],
+function(
+  viewParser,
+  extend,
+  utils,
+  scopeTree,
+  Directive
+) {
+  var _repeatReg = /^\s*([\s\S]+?)\s+in\s+([\s\S]+?)(?:\s+as\s+([\s\S]+?))?(?:\s+track\s+by\s+([\s\S]+?))?\s*$/,
+      _keyReg = /^(?:(\s*[\$\w]+)|\(\s*([\$\w]+)\s*,\s*([\$\w]+)\s*\))$/;
 
-  var directive = function(){};
+  var RepeatDirective = function(){};
 
-  var _listReg = /(?:\s+in\s+)([-A-Za-z0-9_\.]+)\s*/i,
-      _keyReg = /(?:\s*)\(*([-A-Za-z0-9_]+)(?:\s*\,*\s*)([-A-Za-z0-9_]+)*\)*(?:\s+in)/i;
-
-  var _getLength = function (o) {
-    try {
-      if ($.isArray(o)) return o.length;
-      var ct = 0;
-      for (var key in o) ct++;
-      return ct;
-    } catch (e) {
-      console.error("Could not get length of " + o + ". Please use a proper array or object or string for ng-repeat");
-      return 0;
-    }
-  };
-
-  var _isObject = function(o) {
-    return typeof o === 'object' && !$.isArray(o);
-  };
-
-  directive.prototype.init = function(attrs) {
+  RepeatDirective.prototype.init = function(attrs) {
     // First get the template.
-    this.watchKey = attrs[directiveName];
+    this.watchKey = attrs[this.__className];
     this.setTemplate();
+
     // Next parse out the repeat.
-    var list = this.watchKey.match(_listReg)[1],
-        keyMatch = this.watchKey.match(_keyReg);
-    this.itemKey = keyMatch[1];
-    this.itemVal = keyMatch[2];
+    this._parseRepeatString();
+
     // Next replace element with a comment (like dc-if).
     this.addComment();
-    // Next watch the list
-    this.watchedList = '$scope["' + list + '"]';
-    this.$watchArray(this.watchedList, this.onListChanged);
-    // Now initialize
-    this.list = [];
-    this.onListChanged(this.getWatchedList());
+
+    this.$parseAndWatchCollection(this.rhs, this._onCollectionChanged, this.$scope);
   };
 
-  directive.prototype.getWatchedList = function() {
-    return Path.get(this.watchedList).getValueFrom(this);
-  };
-
-  directive.prototype.setTemplate = function() {
+  RepeatDirective.prototype.setTemplate = function() {
     // Get the template.
-    this.elTemplate = $.extend(true, {}, this.$compile(this.el, this.$scope, true));
-    // Now get rid of the directive from it so it doesn't repeat each time.
-    var i = 0;
-    while (i < this.elTemplate.views.length) {
-      if (this.elTemplate.views[i].name === directiveName) {
-        this.elTemplate.views.splice(i,1);
-      } else {
-        i++;
-      }
-    }
-  };
-
-  directive.prototype.onListChanged = function(o) {
-    // On change, add/remove/replace elements keeping track of the last element (which could be the comment).
-    var splices = o ? o.splices : null;
-    if (!splices) {
-      if (_isObject(o)) {
-        console.log("repeat doesn't work on objects...yet");
-        return;
-      }
-      splices = [{
-        addedCount: _getLength(o),
-        index: 0,
-        removed: this.list
-      }];
-    }
-    var baseList = this.getWatchedList();
-    for (var i=0; i<splices.length; i++) {
-      var changed = [], removed = [], added = [];
-      var idx = splices[i].index,
-        numAdded = splices[i].addedCount,
-        numRemoved = splices[i].removed.length;
-
-      // start with removed
-      for (var j = 0; j < numRemoved; j++) {
-        if (j < numAdded) {
-          changed.push(idx + j);
+    this.$compile(this.el, this.$scope, function(template) {
+      this.elTemplate = $.extend(true, {}, template);
+      // Now get rid of the directive from it so it doesn't repeat every time.
+      var i = 0;
+      while (i < this.elTemplate.views.length) {
+        if (this.elTemplate.views[i].name === this.__className) {
+          this.elTemplate.views.splice(i,1);
         } else {
-          removed.push(idx + j);
+          i++;
         }
       }
-      var lastChangedIdx = changed[changed.length - 1] || idx;
-      for (var j = 0; j < (numAdded - numRemoved); j++) {
-        //console.log(lastChangedIdx, j, numRemoved);
-        added.push(lastChangedIdx + j + (numRemoved ? 1 : 0));
-      }
-      this._addItems(added, baseList);
-      this._changeItems(changed, baseList);
-      this._removeItems(removed);
-    }
-    this.updateItems();
+    }, true);
   };
 
-  directive.prototype._addItems = function(added, baseList) {
-    // Add items from the added array in onListChanged
-    for (var i = 0; i < added.length; i++) {
-      var ct = added[i];
-      var item = this.createItem(baseList, ct);
-      item.el = this.$compile(this.elTemplate, item.io);
-      if (ct <= 0) {
-        ct = 0;
-      } else if (ct > this.list.length) {
-        ct = this.list.length;
-      }
-      // now add it into the dom after the prev el
-      var prevEl = ct - 1 > -1 ? this.list[ct - 1].el : this.el;
+  RepeatDirective.prototype._parseRepeatString = function() {
+    var match = this.watchKey.match(_repeatReg);
+    // TODO(TJ): throw error or warning if match is not found.
+    this.lhs = match[1];
+    this.rhs = match[2];
+    this.aliasAs = match[3];
+    this.trackByExp = match[4];
 
-      this.$insertElementAfter(item.el, prevEl);
-      this.list.splice(ct, 0, item);
+    match = this.lhs.match(_keyReg);
+    var valueIdentifier = match[3] || match[4];
+    var keyIdentifier = match[2];
+    this.itemKey = keyIdentifier;
+    this.valueKey = valueIdentifier || this.lhs;
+    // TODO(TJ): test aliasAs against reserved keys.
+
+    var hashFnLocals = {$id: utils.getId};
+    if (this.trackByExp) {
+      this.trackByExpGetter = utils.$parse(this.trackByExp);
+    } else {
+      this.trackByIdArrayFn = function (key, value) {
+        return utils.getId(value);
+      };
+      this.trackByIdObjFn = function (key) {
+        return key;
+      };
     }
+
+    if (this.trackByExpGetter) {
+      this.trackByIdExpFn = function (key, value, index) {
+        // assign key, value, and $index to the locals so that they can be used in hash functions
+        if (keyIdentifier) hashFnLocals[keyIdentifier] = key;
+        hashFnLocals[valueIdentifier] = value;
+        hashFnLocals.$index = index;
+        return this.trackByExpGetter(this.$scope, hashFnLocals);
+      }.bind(this);
+    }
+
+    this.lastBlockMap = {};
   };
 
-  directive.prototype._changeItems = function(changed, baseList) {
-    // Change items from the changed array in onListChanged
-    for (var i = 0; i < changed.length; i++) {
-      var ct = changed[i],
-          item = this.createItem(baseList, ct);
-      this.list[ct].io = item.io;
-    }
-  };
-
-  directive.prototype._removeItems = function(removed) {
-    for (var i = 0; i < removed.length; i++) {
-      var ct = removed[i] - i;
-      this.$removeElement(this.list[ct] ? this.list[ct].el : null);
-      this.list.splice(ct, 1);
-    }
-  };
-
-  directive.prototype.addComment = function() {
+  RepeatDirective.prototype.addComment = function() {
     // Create the comment.
-    var newEl = this.$compile('<!-- ' + directiveName + '="' + this.watchKey + '" -->', this.$scope);
-    // Add it before the el.
-    this.$insertElementBefore(newEl);
-    // Remove the current el.
-    this.$removeElement(this.el);
-    // Set the el in the scope tree to the new el
-    this.el = newEl;
+    this.$compile('<!-- ' + this.__className + '-start="' + this.watchKey + '" -->', null, function(newEl) {
+      // Add it before the el.
+      this.$insertElementBefore(newEl);
+      // Remove the current el.
+      this.$removeElement(this.el);
+      // Set the el in the scope tree to the new el
+      this.el = newEl;
+    });
+    // Have to add an end comment and add a fake scope for it as a placeholder for the repeat items' scopes.
+    var scopeTree = this.scopeTree.parent.append({});
+    this.$compile('<!-- ' + this.__className + '-end="' + this.watchKey + '" -->', scopeTree, function(newEl) {
+      this.endComment = newEl;
+    });
   };
 
-  directive.prototype.createItem = function(baseList, ct, isObject) {
-    var o = baseList[ct];
-    var item = {
-      '$parentScope': this.$scope,
-      '$index': -1,
-      '$first': false,
-      '$last': false,
-      '$middle': false,
-      '$even': false,
-      '$odd': false
-    };
-    item[this.itemKey] = o;
+  RepeatDirective.prototype._onCollectionChanged = function(collection) {
+    var lastBlockMap = this.lastBlockMap;
 
-    return {
-      'io': item,
-      'el': null
+    if (this.aliasAs) {
+      this.$scope[this.aliasAs] = collection;
     }
-  };
-
-  directive.prototype.updateItems = function() {
-    var len = _getLength(this.list);
-    for (var i=0; i<len; i++) {
-      var io = this.list[i].io;
-      io.$index = i;
-      io.$first = i === 0;
-      io.$last = i === len - 1;
-      io.$middle = !io.$first && !io.$last;
-      io.$even = !!(i % 2);
-      io.$odd = !io.$even;
+    var collectionKeys,
+        trackByIdFn;
+    if (utils.isArrayLike(collection)) {
+      collectionKeys = collection;
+      trackByIdFn = this.trackByIdExpFn || this.trackByIdArrayFn;
+    } else {
+      trackByIdFn = this.trackByIdExpFn || this.trackByIdObjFn;
+      collectionKeys = [];
+      for (var itemKey in collection) {
+        if (hasOwnProperty.call(collection, itemKey) && itemKey.charAt(0) !== '$') {
+          collectionKeys.push(itemKey);
+        }
+      }
     }
+
+    var collectionLength = collectionKeys.length,
+        index,
+        key,
+        value,
+        trackById,
+        block,
+        nextBlockMap = {},
+        nextBlockOrder = new Array(collectionLength);
+
+    for (index = 0; index < collectionLength; index++) {
+      key = (collection === collectionKeys) ? index : collectionKeys[index];
+      value = collection[key];
+      trackById = trackByIdFn(key, value, index);
+      if (lastBlockMap[trackById]) {
+        block = lastBlockMap[trackById];
+        delete lastBlockMap[trackById];
+        nextBlockMap[trackById] = block;
+        nextBlockOrder[index] = block;
+      } else if (nextBlockMap[trackById]) {
+        console.warn('dupes');
+      } else {
+        nextBlockOrder[index] = {id: trackById, scope: undefined, el: undefined};
+        nextBlockMap[trackById] = true;
+      }
+    }
+
+    // Remove leftover items.
+    for (var blockKey in lastBlockMap) {
+      block = lastBlockMap[blockKey];
+      // TODO(TJ): think about animation here -- maybe just scale(0,0) then remove after?
+      this.$removeElement(block.el);
+    }
+
+    var previousEl = this.el;
+
+    for (index = 0; index < collectionLength; index++) {
+      key = (collection === collectionKeys) ? index : collectionKeys[index];
+      value = collection[key];
+      block = nextBlockOrder[index];
+
+      if (block.scope) {
+        // If there's already a scope, let's reuse it.
+        // TODO(TJ): Again, think about animation here. Maybe get current element's position, diff from new position,
+        // set translate to that, then on next animation frame, set translate to 0,0.
+        this.$insertElementAfter(block.el, previousEl);
+        previousEl = block.el;
+        updateScope(block.scope, index, collectionLength);
+      } else {
+        block.scope = {};
+        updateScope(block.scope, index, collectionLength, this.itemKey, key, this.valueKey, value);
+        //var scopeTree = this.scopeTree.append(block.scope);
+        //console.log(this.scopeTree.parent);
+        this.$compile(this.elTemplate, block.scope, function(el) {
+          block.el = el;
+          this.$insertElementAfter(block.el, previousEl);
+          previousEl = el;
+          nextBlockMap[block.id] = block;
+          block.scope.scopeTree = scopeTree.getTreeFromScope(block.scope);
+        });
+      }
+    }
+    this.lastBlockMap = nextBlockMap;
   };
 
-  $app.addDirective(subClass, {
-    'name': directiveName,
-    'directive': directive,
+  var updateScope = function(scope, index, arrayLength, keyIdentifier, key, valueIdentifier, value) {
+    scope.$index = index;
+    scope.$first = index === 0;
+    scope.$last = index === (arrayLength - 1);
+    scope.$middle = !(scope.$first || scope.$last);
+    scope.$even = (index&1) === 0;
+    scope.$odd = !scope.$even;
+    // add other stuff
+    if (arguments.length > 3) {
+      if (keyIdentifier) scope[keyIdentifier] = key;
+      scope[valueIdentifier] = value;
+      scope.__proto__ = Directive.prototype;
+    }
+    return scope;
+  };
+
+  return viewParser.addDirective({
+    'directive': extend(Directive, RepeatDirective),
     'interrupts': true
   });
-
-})(subClass);
+});

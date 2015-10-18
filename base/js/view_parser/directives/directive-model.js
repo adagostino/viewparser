@@ -1,12 +1,10 @@
-var subClass = 'directive';
-(function(subClass){
-  var directiveName = 'dc-model';
+var __className = 'dc-model';
+$require(__className, ['viewParser', 'extend', 'directive'], function(viewParser, extend, Directive) {
+  var ModelDirective = function(){};
 
-  var directive = function(){};
-
-  directive.prototype.init = function(attrs) {
+  ModelDirective.prototype.init = function(attrs) {
     var fn = this.el.tagName === 'INPUT' || this.el.tagName === 'TEXTAREA' ? 'value' : 'innerHTML',
-        model = attrs[directiveName];
+        model = attrs[this.__className];
 
     this.$watch('$scope.' + model, function(val) {
       if (this.el[fn] !== val) this.el[fn] = (val || '');
@@ -23,8 +21,7 @@ var subClass = 'directive';
     if (this.el[fn] !== val) this.el[fn] = (val || '');
   };
 
-  $app.addDirective(subClass, {
-    'name': directiveName,
-    'directive': directive
+  return viewParser.addDirective({
+    'directive': extend(Directive, ModelDirective)
   });
-})(subClass);
+});

@@ -40,76 +40,67 @@
             transform: translate(0, 100%);
             transition: transform 0.218s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
+
+        .item-count {
+            position: fixed;
+            top: 24px;
+            left: 24px;
+            background: rgba(0,0,0,0.5);
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 3px;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
-    <div dc-app="testApp"></div>
-
-    <script id="test-app" type="template">
-        <div dc-controller="test-controller">
-            <div>Num Cols: <input dc-model="numCols"> Image Width: <input dc-model="thumbWidth"> Image Height: <input dc-model="thumbHeight"> Gutter: <input dc-model="gutter"></div>
-            <div>
-                <div class="item" dc-repeat="item in testObjs">
-                    <div class="item-img-container">
-                        <img class="item-img" src="{{item.src}}">
-                        <div class="item-header">Image {{$index}}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </script>
-
-    <script id="test-template2" type="template">
-        <div id="test-{{$index}}" dc-repeat = 'item in testObjs' dc-style="{'outline': $index%2 ? '1px solid blue' : ''}" style="display: inline-block" >
-            {{item.text}} {{$index}}
-        </div>
-    </script>
-
-    <script id="test-template" type="template">
-        <div dc-controller="test-controller">
-            <div id="test-{{$index}}" dc-repeat = 'item in testObjs' dc-style="{'outline': $index%2 ? '1px solid blue' : ''}" style="display: inline-block" >
-                {{item.text}} {{$index}}
-                <div data-id="whatever">
-                    <table dc-class="{'hide': item.hide, 'party': item.color === 'red' && item.fontWeight === 'bold'}">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <a style="color:{{item.color}}; font-weight: {{item.fontWeight}}" dc-style="{'margin-left': item.marginLeft, 'margin-top': item.marginTop}" dc-attr="{'href': item.href, 'target': item.href ? '_blank': ''}">{{item.text2}}</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div id="if-{{$index}}" dc-class="{'isShown': $index%2}" dc-if="$index%2">
-                    <div id="div-{{$index}}" dc-click="item.party($index, item.color)">
-                        {{item.text3}} {{$index}}
-                    </div>
-                    <input dc-model="item.inputText">
-                </div>
-                <textarea dc-model="item.inputText"></textarea>
-                <div dc-include="#test-include"></div>
-            </div>
-        </div>
-    </script>
-
-    <script id="test-include" type="template">
-        <div style="color: {{item.color}}">
-            {{item.text4}} {{$index}}
-        </div>
-    </script>
+    <div dc-app="test-app"></div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="base/js/require.js"></script>
+    <script src="base/js/app/utils.js"></script>
+    <script src="base/js/singleton.js"></script>
     <script src="base/js/subclass.js"></script>
-    <script src="base/js/view_parser/third_party/observe.js" type="text/javascript"></script>
+    <script src="base/js/id_generator.js"></script>
+    <script src="base/js/view_parser/third_party/html-parser.js"></script>
+    <script src="base/js/view_parser/third_party/observe.js"></script>
     <script src="base/js/view_parser/third_party/parser.js"></script>
+
+    <script src="base/js/view_parser/virtual/node.js"></script>
     <script src="base/js/view_parser/virtual/element.js"></script>
+    <script src="base/js/view_parser/virtual/fragment.js"></script>
+    <script src="base/js/view_parser/virtual/textnode.js"></script>
+    <script src="base/js/view_parser/virtual/comment.js"></script>
+    <script src="base/js/view_parser/virtual/document.js"></script>
+
+    <script src="base/js/trees/tree.js"></script>
+    <script src="base/js/trees/scope-tree.js"></script>
+    <script src="base/js/trees/dom-tree.js"></script>
+
     <script src="base/js/view_parser/view-parser.js"></script>
-    <script src="base/js/view_parser/view-parser-garbage.js"></script>
+    <script src="base/js/view_parser/view-parser-base.js"></script>
     <script src="base/js/view_parser/view-parser-parse.js"></script>
     <script src="base/js/view_parser/view-parser-compile.js"></script>
-    <script src="base/js/app.js"></script>
-    <script src="base/js/base.js"></script>
-    <script src="base/js/view.js"></script>
+
+    <script src="base/js/app/app.js"></script>
+    <script src="base/js/app/base-app.js"></script>
+
+    <script src="base/js/view/base.js"></script>
+    <script src="base/js/view/observer.js"></script>
+    <script src="base/js/view/listener.js"></script>
+    <script src="base/js/view/view.js"></script>
+
+    <script src="base/js/model/ajax.js"></script>
+    <script src="base/js/model/model.js"></script>
+
+    <script src="base/js/router/location.js"></script>
+    <script src="base/js/router/history.js"></script>
+    <script src="base/js/router/route.js"></script>
+    <script src="base/js/router/router.js"></script>
+
+    <script src="base/js/view_parser/filters/filters.js"></script>
+    <script src="base/js/view_parser/filters/filter-limit-to.js"></script>
+
     <script src="base/js/view_parser/controllers/controller.js"></script>
     <script src="base/js/view_parser/directives/directive.js"></script>
     <script src="base/js/view_parser/directives/directive-class.js"></script>
@@ -121,7 +112,9 @@
     <script src="base/js/view_parser/directives/directive-if.js"></script>
     <script src="base/js/view_parser/directives/directive-repeat.js"></script>
 
-    <script src="testApp/testApp.js"></script>
+    <script src="testApp/test-router.js"></script>
+    <script src="testApp/test-app.js"></script>
     <script src="testApp/test-controller.js"></script>
+    <script src="testApp/test-directive.js"></script>
 </body>
 </html>

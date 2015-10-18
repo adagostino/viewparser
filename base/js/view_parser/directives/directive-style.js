@@ -1,17 +1,15 @@
-var subClass = 'directive';
-(function(subClass) {
-  var directiveName = 'dc-style';
+var __className = 'dc-style';
+$require(__className, ['utils', 'viewParser', 'extend', 'directive'], function(utils, viewParser, extend, Directive) {
+  var StyleDirective = function(){};
 
-  var directive = function(){};
-
-  directive.prototype.init = function(attrs) {
+  StyleDirective.prototype.init = function(attrs) {
     this.styleMap = null;
-    this.$parseAndWatch(attrs[directiveName], function() {
+    this.$parseAndWatch(attrs[this.__className], function() {
       var o = this._parseFunc(this.$scope);
       if (!this.styleMap) {
         this.styleMap = {};
         for (var key in o) {
-          var ccKey = $app.utils.toCamelCase(key);
+          var ccKey = utils.toCamelCase(key);
           this.styleMap[key] = ccKey;
         }
       }
@@ -19,7 +17,7 @@ var subClass = 'directive';
     });
   };
 
-  directive.prototype.styleChanged = function(o) {
+  StyleDirective.prototype.styleChanged = function(o) {
     for (var key in o) {
       var cc = this.styleMap[key],
           value = o[key];
@@ -29,19 +27,16 @@ var subClass = 'directive';
     }
   };
 
-  directive.prototype.addStyle = function(key, value) {
-    value += $app.utils.isNumber(value) ? 'px' : '';
+  StyleDirective.prototype.addStyle = function(key, value) {
+    value += utils.isNumber(value) ? 'px' : '';
     this.el.style[key] = value;
   };
 
-  directive.prototype.removeStyle = function(key) {
+  StyleDirective.prototype.removeStyle = function(key) {
     this.el.style[key] = "";
   };
 
-  $app.addDirective(subClass, {
-    'name': directiveName,
-    'directive': directive
+  return viewParser.addDirective({
+    'directive': extend(Directive, StyleDirective)
   });
-
-
-})(subClass);
+});

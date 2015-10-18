@@ -1,8 +1,8 @@
-var subClass = 'view';
-(function(subClass) {
-  var controller = function(){};
+var __className = 'controller';
+$require(__className, ['view', 'extend'], function(View, extend) {
+  var Controller = function(){};
 
-  controller.prototype.__templateType = 'controller';
+  Controller.prototype.__templateType = 'controller';
 
-  $app.add(subClass, controller, 'controller');
-})(subClass);
+  return extend(View, Controller);
+});
