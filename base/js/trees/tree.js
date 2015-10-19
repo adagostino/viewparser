@@ -48,14 +48,17 @@ $require('tree', ['idGenerator'], function(IdGenerator) {
   };
 
   Tree.prototype.moveBefore = function(beforeThisItem) {
+    // TODO(TJ): findIndex is a big bottleneck. Should try to figure out how to do it another way.
     if (!this.parent) return;
-    var idx = this.parent._getIndexOfChild(this);
+
     if (this.previous) {
       this.previous.next = this.next;
     }
     if (this.next) {
       this.next.previous = this.previous;
     }
+
+    var idx = this.parent._getIndexOfChild(this);
     this.parent.children.splice(idx, 1);
     this.parent.insertBefore(this, beforeThisItem);
   };

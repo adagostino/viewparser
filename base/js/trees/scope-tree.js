@@ -36,32 +36,42 @@ $require(__className, ['extend', 'singleton', 'tree'], function(extend, singleto
     return !!this._childMap[$scope.__$scopeId];
   };
 
+  ScopeTree.prototype.removeChildren = function() {
+    while (this.children.length) {
+      var childTree = this.children.splice(0, 1)[0];
+      this._childMap[childTree.__$scopeId] = null;
+      childTree._onRemove();
+      childTree.removeChildren();
+    }
+  };
+
   ScopeTree.prototype.removeChild = function($scope) {
     var scopeTreeObj = _scopeTreeMap[$scope.__id];
     if (!scopeTreeObj) return;
-    while (scopeTreeObj.children.length) {
-      scopeTreeObj.children[0].removeSelf();
-    }
-    this._super(scopeTreeObj);
+    scopeTreeObj.removeChildren();
+    //console.log('super', this.__id, this.children.length);
+    //this._super(scopeTreeObj);
     this._childMap[scopeTreeObj.__$scopeId] = null;
     _scopeTreeMap[scopeTreeObj.__$scopeId] = null;
     this.setPointers();
     // Add'l stuff here.
-
   };
 
   ScopeTree.prototype.removeSelf = function() {
-    console.log(this.__id);
-    for (var i=0; i<this.children.length; i++) {
-      this.children[i].removeSelf();
-    }
-    try {
-      this.triggerEventOnSelf('$remove', this.$scope);
-      this.$scope.$call(this.$scope, this.$scope.$onRemove);
-      this.$scope.removeObservers();
-      this.$scope.removeRoutes();
-    } catch(err) {}
+    if (!_scopeTreeMap[this.__id]) return;
+    // Next call super which will call removeChild.
+    //console.log('super', this.__id);
     this._super();
+    // Now trigger the remove on itself.
+    this._onRemove();
+  };
+
+  ScopeTree.prototype._onRemove = function() {
+    _scopeTreeMap[this.__$scopeId] = null;
+    this.triggerEventOnSelf('$remove', this.$scope);
+    this.$scope.$onRemove && this.$scope.$onRemove();
+    this.$scope.removeObservers && this.$scope.removeObservers();
+    this.$scope.removeRoutes && this.$scope.removeRoutes();
   };
 
   ScopeTree.prototype.setPointers = function() {

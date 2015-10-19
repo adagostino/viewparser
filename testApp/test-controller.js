@@ -4,14 +4,13 @@ $app.require('test-controller', function() {
   TestController.prototype.init = function() {
     this.testItems = [];
     this.repeatLimit = 100;
-    this.numItems = 1000;
+    this.numItems = 10000;
     this.buildItems();
     var fn = this._onScroll.bind(this);
 
     $(window).on('scroll', fn);
 
     this.$on('$remove', function(e) {
-      console.log('remove?', this.__id);
       $(window).off('scroll', fn);
     });
   };
@@ -19,7 +18,7 @@ $app.require('test-controller', function() {
   TestController.prototype.buildItems = function() {
     for (var i=0; i<this.numItems; i++) {
       this.testItems.push({
-        'text': 'This is a test item'
+        'text': 'party'
       });
     }
   };
