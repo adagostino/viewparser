@@ -1,0 +1,73 @@
+{
+  "site": "http://localhost:3000/",
+  "index": "client/index.html",
+  "both": {
+    "js": [
+
+    ]
+  },
+  "client": {
+    "relative": "/client/",
+    "js": [
+      "js/viewParser/require.js",
+      "js/viewParser/app/utils.js",
+      "js/viewParser/queue.js",
+      "js/viewParser/singleton.js",
+      "js/viewParser/subclass.js",
+      "js/viewParser/id_generator.js",
+      "js/viewParser/view_parser/third_party/html-parser.js",
+      "js/viewParser/view_parser/third_party/observe.js",
+      "js/viewParser/view_parser/third_party/parser.js",
+      "js/viewParser/view_parser/virtual/node.js",
+      "js/viewParser/view_parser/virtual/element.js",
+      "js/viewParser/view_parser/virtual/fragment.js",
+      "js/viewParser/view_parser/virtual/textnode.js",
+      "js/viewParser/view_parser/virtual/comment.js",
+      "js/viewParser/view_parser/virtual/document.js",
+      "js/viewParser/trees/tree.js",
+      "js/viewParser/trees/scope-tree.js",
+      "js/viewParser/trees/dom-tree.js",
+      "js/viewParser/view_parser/view-parser.js",
+      "js/viewParser/view_parser/view-parser-base.js",
+      "js/viewParser/view_parser/view-parser-parse.js",
+      "js/viewParser/view_parser/view-parser-compile.js",
+      "js/viewParser/app/app.js",
+      "js/viewParser/app/base-app.js",
+      "js/viewParser/app/base-app-client.js",
+      "js/viewParser/app/base-app-server.js",
+      "js/viewParser/app/$app.js",
+      "js/viewParser/view/base.js",
+      "js/viewParser/view/observer.js",
+      "js/viewParser/view/listener.js",
+      "js/viewParser/view/view.js",
+      "js/viewParser/model/ajax.js",
+      "js/viewParser/model/model.js",
+      "js/viewParser/router/location.js",
+      "js/viewParser/router/history.js",
+      "js/viewParser/router/route.js",
+      "js/viewParser/router/router.js",
+      "js/viewParser/view_parser/filters/filters.js",
+      "js/viewParser/view_parser/filters/filter-limit-to.js",
+      "js/viewParser/view_parser/controllers/controller.js",
+      "js/viewParser/view_parser/directives/directive.js",
+      "js/viewParser/view_parser/directives/directive-class.js",
+      "js/viewParser/view_parser/directives/directive-style.js",
+      "js/viewParser/view_parser/directives/directive-attr.js",
+      "js/viewParser/view_parser/directives/directive-listeners.js",
+      "js/viewParser/view_parser/directives/directive-model.js",
+      "js/viewParser/view_parser/directives/directive-include.js",
+      "js/viewParser/view_parser/directives/directive-if.js",
+      "js/viewParser/view_parser/directives/directive-repeat.js",
+      "js/test-router.js",
+      "js/test-app.js",
+      "js/test-controller.js",
+      "js/test-directive.js"
+    ]
+  },
+  "server": {
+    "relative": ".",
+    "js": [
+
+    ]
+  }
+}
