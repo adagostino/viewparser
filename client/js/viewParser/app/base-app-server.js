@@ -103,32 +103,23 @@ $require(__className,
   BaseAppServer.prototype._fetchTemplate = function(callback) {
     if (this.fetchedIndex) return this.$call(this, callback);
 
-    var html = '';
     var path = this._indexTemplate;
-    ajax.$get({
-      'url': path,
-      'context': this,
-      'done': function (data) {
-        html = data;
-      },
-      'fail': function () {
-        console.warn('failed to fetch', path, '. Please check the path.', arguments);
-      },
-      'always': function () {
-        var returnObj = {
-          'docType': '',
-          'template': html
-        };
-        if (html) {
-          returnObj.template = utils.trim(html.replace(_docTypeRegEx, function(match) {
-            returnObj.docType = match;
-            return '';
-          }));
-          this.fetchedIndex = returnObj;
-        }
-        this.$call(this, callback);
+
+    ajax.$fetchTemplate(path, function(html) {
+      var returnObj = {
+        'docType': '',
+        'template': html
+      };
+      if (html) {
+        returnObj.template = utils.trim(html.replace(_docTypeRegEx, function(match) {
+          returnObj.docType = match;
+          return '';
+        }));
+        this.fetchedIndex = returnObj;
       }
-    });
+      this.$call(this, callback);
+    }, this);
+
   };
 
   BaseAppServer.prototype.reset = function() {

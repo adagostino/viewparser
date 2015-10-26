@@ -50,6 +50,23 @@ $require(__className, ['listener', 'extend', 'utils'], function(Listener, extend
     this._crud('delete', options);
   };
 
+  Ajax.prototype.$fetchTemplate = function(template, callback, context) {
+    var html = '';
+    this.$get({
+      'url': template,
+      'context': context,
+      'done': function(data) {
+        html = data;
+      },
+      'fail': function() {
+        console.warn('failed to fetch template', template,'. Please check the path.');
+      },
+      'always': function() {
+        this.$call(this, callback, html, template);
+      }
+    });
+  };
+
   Ajax.prototype._crud = function(method, options) {
     var opts = $.extend(true, {}, this.options, options || {});
     opts.type = _getCrudType(method);

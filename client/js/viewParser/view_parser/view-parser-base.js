@@ -76,21 +76,10 @@ function(
     if (_fetchedTemplates.hasOwnProperty(path)) {
       callback.call(this, _fetchedTemplates[path], path);
     } else {
-      var html = '';
-      ajax.$get({
-        'url': path,
-        'context': this,
-        'done': function(data) {
-          html = data;
-        },
-        'fail': function() {
-          console.warn('failed to fetch', path,'. Please check the path.');
-        },
-        'always': function() {
-          _fetchedTemplates[path] = html;
-          this.$call(this, callback, html, path);
-        }
-      });
+      ajax.$fetchTemplate(path, function(html) {
+        _fetchedTemplates[path] = html;
+        this.$call(this, callback, html, path);
+      }, this);
     }
   };
 
