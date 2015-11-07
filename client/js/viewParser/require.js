@@ -95,5 +95,10 @@
     return true;
   };
 
+  var $class = function(className) {
+    return _classes[className];
+  };
+
   global.$require = $require;
+  global.$class = $class;
 })(typeof global !== 'undefined' && global && typeof module !== 'undefined' && module ? global : this || window);

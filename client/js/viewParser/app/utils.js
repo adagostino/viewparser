@@ -193,5 +193,13 @@ $require(__className, ['singleton', 'ngParser', 'idGenerator'], function(singlet
     return this.isWindow(global);
   };
 
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000).toString(32);
+  }
+
+  Utils.prototype.guid = function() {
+    return s4() + s4();
+  };
+
   return singleton.create(Utils);
 });

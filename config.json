@@ -1,10 +1,10 @@
 {
   "site": "http://localhost:3000/",
   "index": "client/index.html",
+  "relative": ".",
   "both": {
-    "js": [
-
-    ]
+    "relative": "",
+    "js": []
   },
   "client": {
     "relative": "/client/",
@@ -65,9 +65,28 @@
     ]
   },
   "server": {
-    "relative": ".",
+    "relative": "/server/",
     "js": [
-
-    ]
+      "logger.js",
+      "server-test.js",
+      "app/microService.js",
+      "app/baseMessenger.js",
+      "app/constants.js",
+      "app/portStore.js",
+      "app/messenger.js",
+      "app/req.js",
+      "app/endpoint.js",
+      "app/server.js",
+      "endpoints/endpoint-home.js"
+    ],
+    "require": [
+      "child_process",
+      "zmq",
+      "express",
+      "os"
+    ],
+    "helpers": {
+      "spawn": "spawn.js"
+    }
   }
 }
