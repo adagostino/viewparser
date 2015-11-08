@@ -18,6 +18,9 @@ function(
 
   ServerTest.prototype.init = function() {
     this.routes = routes;
+    this.publicRoutes = {
+      '/client': './client'
+    };
   };
 
   return extend(Server, ServerTest);

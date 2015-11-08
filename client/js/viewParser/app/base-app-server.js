@@ -13,13 +13,15 @@ function(
   utils
 ) {
 
-  var jsdom = require("jsdom").jsdom;
-  var doc = jsdom();
-  var window = doc.defaultView;
-  global.$ = require('jquery')(window);
-  $.support.cors = true;
-  global.document = window.document;
-  global.XMLHttpRequest = window.XMLHttpRequest;
+  if (!utils.isClient()) {
+    var jsdom = require("jsdom").jsdom;
+    var doc = jsdom();
+    var window = doc.defaultView;
+    global.$ = require('jquery')(window);
+    $.support.cors = true;
+    global.document = window.document;
+    global.XMLHttpRequest = window.XMLHttpRequest;
+  }
 
   var ajax = new Ajax();
 

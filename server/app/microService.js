@@ -35,7 +35,8 @@ function(
     if (!this.isMaster) return;
     // Default to one service per cpu core.
     var np = this.numProcesses || this.options.numProcesses;
-    this.numProcesses = typeof np === 'number' ? np : os.cpus().length;
+    np = typeof np === 'number' ? np : os.cpus().length;
+    this.numProcesses = np;
 
     if (!this.numProcesses) {
       this.process = process;

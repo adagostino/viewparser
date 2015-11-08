@@ -30,6 +30,7 @@ function(
     if (!this.isMaster) return;
     this._super();
     this.routes = this.routes || this.options.routes || [];
+    this.publicRoutes = this.publicRoutes || this.options.publicRoutes || {};
     // Start up the port store.
     portStore.start();
     if (!this.numProcesses) this.setupApp();
@@ -38,6 +39,11 @@ function(
   Server.prototype.setupApp = function() {
     if (this.app) return;
     this.app = express();
+    for (var route in this.publicRoutes) {
+      var serverPath = this.publicRoutes[route];
+      this.app.use(route, express.static(serverPath));
+    }
+
     for (var i=0; i< this.routes.length; i++) {
       this.addEndpoint(this.routes[i]);
     }
