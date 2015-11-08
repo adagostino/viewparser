@@ -1,4 +1,16 @@
-$require('serverTest', ['extend', 'server', 'endpointHome'], function(extend, Server, EndpointHome) {
+$require('serverTest',
+[
+  'extend',
+  'server',
+  'endpointApiTest',
+  'endpointClient'
+],
+function(
+  extend,
+  Server,
+  EndpointApiTest,
+  EndpointClient
+) {
 
   var routes = Array.prototype.slice.call(arguments, 2);
 

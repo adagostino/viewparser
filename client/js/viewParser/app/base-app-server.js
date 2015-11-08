@@ -3,20 +3,25 @@ $require(__className,
 [
   'baseApp',
   'ajax',
-  'queue',
   'extend',
-  'utils'
-], function(
-    BaseApp,
-    Ajax,
-    Queue,
-    extend,
-    utils
+  'utils',
+],
+function(
+  BaseApp,
+  Ajax,
+  extend,
+  utils
 ) {
-  var ajax = new Ajax();
 
-  var queue = new Queue();
-  //TODO(TJ): set up queue class.
+  var jsdom = require("jsdom").jsdom;
+  var doc = jsdom();
+  var window = doc.defaultView;
+  global.$ = require('jquery')(window);
+  $.support.cors = true;
+  global.document = window.document;
+  global.XMLHttpRequest = window.XMLHttpRequest;
+
+  var ajax = new Ajax();
 
   var BaseAppServer = function(){};
 

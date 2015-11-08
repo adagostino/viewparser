@@ -77,16 +77,17 @@
       "app/req.js",
       "app/endpoint.js",
       "app/server.js",
-      "endpoints/endpoint-home.js"
+      "endpoints/endpoint-api-test.js",
+      "endpoints/endpoint-client.js"
     ],
     "require": [
       "child_process",
       "zmq",
       "express",
       "os"
-    ],
-    "helpers": {
-      "spawn": "spawn.js"
-    }
+    ]
+  },
+  "helpers": {
+    "spawn": "spawn.js"
   }
 }
