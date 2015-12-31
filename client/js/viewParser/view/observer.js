@@ -128,6 +128,13 @@ $require(__className, ['extend', 'utils', 'base'], function(extend, utils, Base)
     return this._apply(context, fn, Array.prototype.slice.call(arguments, 2));
   };
 
+  // Used to format callbacks so that they use this.$apply (and thus Platform.performMicrotaskCheckpoint).
+  Observer.prototype.$callback = function(callback, context) {
+    return function() {
+      this.$apply(context || this, callback, arguments);
+    }.bind(this);
+  };
+
   Observer.prototype.$getParseOptions = function(o) {
     var parseFunc = utils.$parse(o);
     var paths = utils.getPaths(parseFunc.lexer.lex(o));

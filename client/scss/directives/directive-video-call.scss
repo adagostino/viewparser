@@ -1,0 +1,43 @@
+@import '../imports/imports';
+$time: 0.218s;
+$easing: ease-in-out;
+.directive-video-call-container {
+  min-height: inherit;
+  position: relative;
+
+  .local-video, .remote-video {
+    will-change: opacity, transform, -webkit-transform;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+    transform-origin: 0px 0px;
+    @include transform(scale(1, 1) translate(0, 0));
+  }
+
+  .local-video {
+    z-index: 1;
+    @include transition(transform $time $easing);
+  }
+
+  .remote-video {
+    @include opacity(0.0);
+    @include transition(opacity $time $easing);
+  }
+  $scale: 0.1;
+  $offset: 10px;
+  &.connected {
+    .local-video {
+      @include transform(scale($scale, $scale) translate($offset / $scale, $offset / $scale));
+    }
+    .remote-video {
+      @include opacity(1.0);
+      @include transition(opacity $time*3 $easing $time);
+    }
+  }
+
+}
+
+
+

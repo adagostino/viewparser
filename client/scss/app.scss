@@ -1,0 +1,22 @@
+@import 'compass/reset';
+@import 'imports/imports';
+
+html {
+  box-sizing: border-box;
+}
+
+html, body {
+  font-weight: 400;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  min-height: 100vh;
+  position: relative;
+}
+
+app {
+  display: block;
+  min-height: inherit;
+}
+
+.main-app {
+  min-height: inherit;
+}

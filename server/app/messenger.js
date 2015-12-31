@@ -1,4 +1,4 @@
-$require('messenger', ['extend', 'portStore', 'baseMessenger'], function(extend, portStore, BaseMessenger) {
+$require('messenger', ['extend', 'portStore', 'baseRouterDealer'], function(extend, portStore, BaseRouterDealer) {
 
   var Messenger = function(){};
 
@@ -11,7 +11,8 @@ $require('messenger', ['extend', 'portStore', 'baseMessenger'], function(extend,
   };
 
   Messenger.prototype._getPort = function() {
-    portStore.getOpenPort(this._onPortCallback.bind(this));
+    var cb = this._onPortCallback.bind(this);
+    this.port ? cb(this.port) : portStore.getOpenPort(cb);
   };
 
   Messenger.prototype._onPortCallback = function(port) {
@@ -19,5 +20,5 @@ $require('messenger', ['extend', 'portStore', 'baseMessenger'], function(extend,
     this._setup();
   };
 
-  return extend(BaseMessenger, Messenger);
+  return extend(BaseRouterDealer, Messenger);
 });

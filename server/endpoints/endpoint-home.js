@@ -1,4 +1,4 @@
-$require('endpointHome', ['extend', 'utils', 'endpoint'], function(extend, utils, Endpoint) {
+$require('endpointHome', ['extend', 'utils', 'endpointBase'], function(extend, utils, EndpointBase) {
 
   var EndpointHome = function(){};
 
@@ -13,6 +13,6 @@ $require('endpointHome', ['extend', 'utils', 'endpoint'], function(extend, utils
   };
 
 
-  return extend(Endpoint, EndpointHome)
+  return extend(EndpointBase, EndpointHome)
 });
 

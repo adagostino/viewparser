@@ -7,24 +7,10 @@ $app.require('test-router', ['ajax'], function(Ajax) {
     {
       'path': '',
       'template': 'client/templates/test-route-home.html',
-      'callbacks': [
-        function(params) {
-          ajax.$get({
-            'url': 'api/test',
-            'context': this,
-            'done': function(){
-              this.next();
-            },
-            'fail': function() {
-              console.log('error', arguments);
-            }
-          });
-          return false;
-        },
-        function(arg1, params) {
-          //console.log('loading home second callback', arguments);
-        }
-      ]
+    },
+    {
+      'path': 'video',
+      'template': 'client/templates/routes/route-video.html'
     },
     {
       'path': 'controller/:whatever',

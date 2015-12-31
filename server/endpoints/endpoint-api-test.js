@@ -1,4 +1,4 @@
-$require('endpointApiTest', ['extend', 'utils', 'endpoint'], function(extend, utils, Endpoint) {
+$require('endpointApiTest', ['extend', 'utils', 'endpointBase'], function(extend, utils, EndpointBase) {
 
   var EndpointApiTest = function(){};
 
@@ -13,6 +13,6 @@ $require('endpointApiTest', ['extend', 'utils', 'endpoint'], function(extend, ut
   };
 
 
-  return extend(Endpoint, EndpointApiTest)
+  return extend(EndpointBase, EndpointApiTest)
 });
 

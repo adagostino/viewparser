@@ -16,6 +16,26 @@ $require(__className, ['idGenerator'], function(idGenerator) {
     return global.__className;
   };
 
+  // Logging.
+  Base.prototype._console = function(type, args) {
+    var a = [this.__className.toUpperCase() + ':'];
+    var b = Array.prototype.slice.call(args, 0);
+    var c = a.concat(b);
+    console[type].apply(console, c);
+  };
+
+  Base.prototype._log = function() {
+    this._console('log', arguments);
+  };
+
+  Base.prototype._warn = function() {
+    this._console('warn', arguments);
+  };
+
+  Base.prototype._error = function() {
+    this._console('error', arguments);
+  };
+
   Base.prototype._isAdmin = false;
 
   return Base;

@@ -1,0 +1,8 @@
+@import '../imports/imports';
+
+.controller-video {
+  min-height: inherit;
+  [directive-video-call] {
+    min-height: inherit;
+  }
+}

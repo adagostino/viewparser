@@ -1,0 +1,47 @@
+.directive-video-call-container {
+  min-height: inherit;
+  position: relative;
+}
+.directive-video-call-container .local-video, .directive-video-call-container .remote-video {
+  will-change: opacity, transform, -webkit-transform;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  transform-origin: 0px 0px;
+  -moz-transform: scale(1, 1) translate(0, 0);
+  -ms-transform: scale(1, 1) translate(0, 0);
+  -webkit-transform: scale(1, 1) translate(0, 0);
+  transform: scale(1, 1) translate(0, 0);
+}
+.directive-video-call-container .local-video {
+  z-index: 1;
+  -moz-transition: -moz-transform 0.218s ease-in-out;
+  -o-transition: -o-transform 0.218s ease-in-out;
+  -webkit-transition: -webkit-transform 0.218s ease-in-out;
+  transition: transform 0.218s ease-in-out;
+}
+.directive-video-call-container .remote-video {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0);
+  opacity: 0;
+  -moz-transition: opacity 0.218s ease-in-out;
+  -o-transition: opacity 0.218s ease-in-out;
+  -webkit-transition: opacity 0.218s ease-in-out;
+  transition: opacity 0.218s ease-in-out;
+}
+.directive-video-call-container.connected .local-video {
+  -moz-transform: scale(0.1, 0.1) translate(100px, 100px);
+  -ms-transform: scale(0.1, 0.1) translate(100px, 100px);
+  -webkit-transform: scale(0.1, 0.1) translate(100px, 100px);
+  transform: scale(0.1, 0.1) translate(100px, 100px);
+}
+.directive-video-call-container.connected .remote-video {
+  filter: progid:DXImageTransform.Microsoft.Alpha(enabled=false);
+  opacity: 1;
+  -moz-transition: opacity 0.654s ease-in-out 0.218s;
+  -o-transition: opacity 0.654s ease-in-out 0.218s;
+  -webkit-transition: opacity 0.654s ease-in-out;
+  -webkit-transition-delay: 0.218s;
+  transition: opacity 0.654s ease-in-out 0.218s;
+}

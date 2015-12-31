@@ -38,15 +38,37 @@ if (cluster.isMaster) {
         break;
       case 'grow':
         var num = parseInt(m.value);
+        console.log('Growing', processClass, 'by', num);
         for (var i=0; i<num; i++) {
-          cluster.fork();
+          fork();
         }
+        break;
+      case 'messageToWorker':
+        if (cluster.workers[m.pid]) {
+          cluster.workers[m.pid].send(m.header, m.body);
+        } else {
+          console.error('TRIED TO SEND MESSAGE TO PROCESS (', m.pid ,') THAT IS NOT CHILD OF', process.pid);
+        }
+        break;
+      case '':
         break;
       default:
         break;
     }
   });
   var numForks = 0;
+  var _workers = [];
+
+  var fork = function() {
+    var n = cluster.fork({
+      'idx': numForks
+    });
+    numForks++;
+    n.on('message', function(m) {
+      process.send(m);
+    });
+  };
+
   // Setup the master.
   cluster.setupMaster({
     args: Array.prototype.slice.call(process.argv, 2) // get args form the command line (like processClass)
@@ -56,30 +78,31 @@ if (cluster.isMaster) {
       'type': 'workerOnline',
       'pid': worker.process.pid
     });
+    _workers.push(worker)
   });
   cluster.on('exit', function(worker, code, signal) {
     process.send({
       'type': 'workerOffline',
       'pid': worker.process.pid
     });
+    for (var i=0; i<_workers.length; i++) {
+      if (_workers[i].process.id == worker.process.id) {
+        _workers[i].splice(i, 1);
+      }
+    }
+    console.log('worker exited', worker.process.pid, worker.suicide, code, signal);
     if (worker.suicide) return;
-    cluster.fork({
-      'idx': numForks
-    });
-    numForks++;
+    fork();
   });
 
   for (var i = 0; i < numProcesses; i++) {
     // Fork them
-    cluster.fork({
-      'idx': numForks
-    });
-    numForks++;
+    fork();
   }
 } else {
-  // console.log('index', process.env['idx']);
   // Load up the JS.
   require('./readConfig.js');
+  // console.log('index', process.env['idx']);
   // Get the process class.
   var ProcessClass = $class(processClass);
   // Create a child process.
@@ -88,4 +111,7 @@ if (cluster.isMaster) {
   var child = new ProcessClass(processOptions);
   // Call the onFork method if it exists.
   child.onFork && child.onFork(cluster.worker);
+  process.on('message', function(messageHeader, messageBody) {
+    child.onProcessMessage && child.onProcessMessage(messageHeader, messageBody);
+  });
 }

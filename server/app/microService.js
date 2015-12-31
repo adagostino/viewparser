@@ -27,6 +27,7 @@ function(
     this.isMaster = options && options.hasOwnProperty('isMaster') ? options.isMaster : !!options;
     this._workers = {
       'pids': {},
+      'pidsArray': [],
       'length': 0
     };
   };
@@ -34,7 +35,7 @@ function(
   MicroService.prototype.__afterInit = function() {
     if (!this.isMaster) return;
     // Default to one service per cpu core.
-    var np = this.numProcesses || this.options.numProcesses;
+    var np = typeof this.numProcesses === 'number' ? this.numProcesses : this.options.numProcesses;
     np = typeof np === 'number' ? np : os.cpus().length;
     this.numProcesses = np;
 
@@ -48,7 +49,7 @@ function(
   // Master Methods.
   MicroService.prototype.spawn = function() {
     if (!this.isMaster || !this.numProcesses || this.process) return;
-
+    // Not the greatest to check the templateType if it's a server here. But okay for now.
     this.process = cp.fork(config.helpers.spawn, [this.__className, this.numProcesses, JSON.stringify(this.options)]);
     this.process.on('message', this._onProcessMessage.bind(this));
     console.log('Master (', this.__className,') is online:', this.process.pid);
@@ -56,18 +57,20 @@ function(
 
   MicroService.prototype._setProcessListeners = function() {
     process.on('SIGINT', function() {
-      //console.log('Process for (', this.__className, ':', this.process.pid, ') received SIGINT: ', arguments);
+      console.log('Process for (', this.__className, ':', this.process.pid, ') received SIGINT: ', arguments);
+      this._onProcessExit();
     }.bind(this));
 
     process.on('exit', function(code) {
-      //console.log('Process for (', this.__className, ':', this.process.pid, ') received EXIT: ', code);
+      console.log('Process for (', this.__className, ':', this.process.pid, ') received EXIT: ', code);
       this._onProcessExit(code);
     }.bind(this));
 
     process.on('uncaughtException', function() {
-      console.log('Process for (', this.__className, ':', this.process.pid, ') received UNCAUGHT EXCEPTION: ', arguments);
-      //this._onProcessExit();
+      console.trace('Process for (', this.__className, ':', this.process.pid, ') received UNCAUGHT EXCEPTION: ', arguments);
+      this._onProcessExit(666);
     }.bind(this));
+
     //this.process.on('exit', this._onProcessExit.bind(this));
   };
 
@@ -76,12 +79,35 @@ function(
     switch(message.type) {
       case 'workerOnline':
         this._workers.pids[message.pid] = 1;
+        this._workers.pidsArray.push(message.pid);
         this._workers.length++;
         console.log('Worker (', this.__className, ') is online:', message.pid);
         break;
       case 'workerOffline':
         delete this._workers.pids[message.pid];
+        for (var i=0; i<this._workers.pidsArray.length; i++) {
+          if (this._workers.pidsArray[i] === message.pid) {
+            this._workers.pidsArray.splice(i, 1);
+            break;
+          }
+        }
         this._workers.length--;
+        break;
+      case 'messageFromWorker':
+        this.onMessageFromWorker(message);
+        break;
+      default:
+        break;
+    }
+  };
+
+  MicroService.prototype.onMessageFromWorker = function(message) {
+    // Leave this blank to for user to use if they'd like later.
+    //console.log('Process for (', this.__className, ':', this.process.pid, ') received message from worker (', message.pid, ') :', message.data);
+    var data = message.data;
+    switch(data.type) {
+      case 'spawn':
+        this.grow(1);
         break;
       default:
         break;
@@ -89,10 +115,12 @@ function(
   };
 
   MicroService.prototype._onProcessExit = function(code) {
-    console.log('Process for (', this.__className, ':', this.process.pid, ') exited with code: ', code);
-    if (code && this.isMaster) {
-      this.process = null;
-      this.spawn();
+    this.process && console.log('Process for (', this.__className, ':', this.process.pid, ') exited with code: ', code);
+    if (code && !this.isMaster) {
+      // Have to send a message to master to spawn a new one.
+      this.sendMasterMessage({
+        'type': 'spawn'
+      });
     }
   };
 
@@ -136,6 +164,18 @@ function(
     this.process.send({'type': 'fork'});
   };
 
+  MicroService.prototype.sendWorkerMessage = function(pid, header, body) {
+    this.process.send({'type': 'messageToWorker', 'pid': pid, 'header': header, 'body': body});
+  };
+
+  MicroService.prototype.getNumWorkers = function() {
+    return this._workers.length;
+  };
+
+  MicroService.prototype.getWorkerPidByInd = function(ind) {
+    return this._workers.pidsArray[ind];
+  };
+
   // Slave methods.
   MicroService.prototype.onFork = function(worker) {
     if (this.isMaster) return;
@@ -154,6 +194,14 @@ function(
       console.log('Worker (', this.__className, ') died:', pid);
     }
     //TODO(TJ): Handle removing listeners etc.
+  };
+
+  MicroService.prototype.sendMasterMessage = function(msg) {
+    this.process.send({
+      'type': 'messageFromWorker',
+      'pid': this.process.pid,
+      'data': msg
+    });
   };
 
   return extend(Observer, MicroService);

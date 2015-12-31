@@ -1,5 +1,7 @@
 {
   "site": "http://localhost:3000/",
+  "serverPort": 3000,
+  "socketPort": 3002,
   "index": "client/index.html",
   "relative": ".",
   "both": {
@@ -61,7 +63,19 @@
       "js/test-router.js",
       "js/test-app.js",
       "js/test-controller.js",
-      "js/test-directive.js"
+      "js/test-directive.js",
+      "js/thirdParty/adapter.js",
+      "js/models/media.js",
+      "js/models/model-socket.js",
+      "js/objects/peerConnection.js",
+      "js/models/call.js",
+      "js/controllers/controller-video.js",
+      "js/directives/directive-video-call.js"
+    ],
+    "css": [
+      "css/app.css",
+      "css/routes/route-video.css",
+      "css/directives/directive-video-call.css"
     ]
   },
   "server": {
@@ -70,24 +84,89 @@
       "logger.js",
       "server-test.js",
       "app/microService.js",
-      "app/baseMessenger.js",
+      "app/baseRouterDealer.js",
       "app/constants.js",
+      "app/blackList.js",
       "app/portStore.js",
       "app/messenger.js",
+      "app/routerDealer.js",
       "app/req.js",
+      "app/redisManager.js",
       "app/endpoint.js",
+      "app/socket.js",
       "app/server.js",
+      "app/controller-server.js",
+      "app/service-server.js",
+      "controllers/controller-kurento.js",
+      "controllers/controller-kurento-loop.js",
+      "controllers/controller-kurento-mirror.js",
+      "controllers/controller-kurento-participant.js",
+      "controllers/controller-kurento-presenter.js",
+      "controllers/controller-kurento-room.js",
+      "controllers/controller-kurento-conference.js",
+      "controllers/controller-kurento-broadcast.js",
+      "controllers/controller-kurento-presentation.js",
+      "endpoints/endpoint-base.js",
       "endpoints/endpoint-api-test.js",
-      "endpoints/endpoint-client.js"
+      "endpoints/endpoint-client.js",
+      "endpoints/endpoint-test.js",
+      "endpoints/endpoint-home.js",
+      "endpoints/socket-base.js",
+      "endpoints/socket-kurento.js",
+      "services/service-kurento.js"
     ],
     "require": [
+      "fs",
       "child_process",
       "zmq",
       "express",
-      "os"
+      "os",
+      "jsdom",
+      "jquery",
+      "ioredis",
+      "socket.io",
+      "socket.io-ioredis",
+      "body-parser",
+      "cookie-parser",
+      "multer",
+      "express-session",
+      "connect-redis",
+      "http"
     ]
+  },
+  "ports": {
+    "range": {
+      "min": 1500,
+      "max": 30000
+    }
+  },
+  "redis": {
+    "numPorts": 6,
+    "startPort": 30001,
+    "host": "127.0.0.1"
+  },
+  "mongo": {
+    "port": 30100,
+    "host": "127.0.0.1"
+  },
+  "turn": {
+    "port": 3478,
+    "range": {
+      "min": 49152,
+      "max": 65535
+    }
+  },
+  "kurento": {
+    "servicePort": 8443,
+    "wsPort": 8888,
+    "ws": "ws://kurento.naar.io"
   },
   "helpers": {
     "spawn": "spawn.js"
+  },
+  "processes": {
+    "endpoints": 1,
+    "sockets": 2,
+    "servers": 1
   }
 }

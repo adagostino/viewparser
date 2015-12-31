@@ -26,6 +26,7 @@ $require(__className, ['viewParserParse'], function(ViewParser) {
 
     observers.length && domTree.addObservers(observers);
     // Next run through the views.
+    var views = [];
     for (var i=0; i<template.views.length; i++) {
       var dir = this._compileMVC(template.views[i], domTree, template.attributes);
       if (dir.scopeTree) {
@@ -42,11 +43,19 @@ $require(__className, ['viewParserParse'], function(ViewParser) {
         i = 0;
         // Maybe should break? but probably not.
       }
+
+      if (dir.view) {
+        views.push(dir.view);
+      }
     }
     // Now go through the children.
     var child;
     for (var i=0; i<template.children.length; i++) {
       child = this.compileTemplate(this.getTemplate(template.children[i]), scopeTree, domTree);
+    }
+    // Now after all of the children have been added, trigger render on the view.
+    for (var i=0; i<views.length; i++) {
+      views[i].$onRender && views[i].$onRender();
     }
 
     return el;
@@ -186,6 +195,9 @@ $require(__className, ['viewParserParse'], function(ViewParser) {
     }
     if (mvcObj.$scope) {
       obj.scopeTree = view.scopeTree;
+    }
+    if (view) {
+      obj.view = view
     }
     return obj;
   };

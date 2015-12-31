@@ -201,5 +201,47 @@ $require(__className, ['singleton', 'ngParser', 'idGenerator'], function(singlet
     return s4() + s4();
   };
 
+  Utils.prototype.searchArray = function(arr, forThis) {
+    if (!this.isArray(arr)) return;
+    var isObj = this.isObject(forThis),
+        found = false;
+
+    for (var i=0; i<arr.length; i++) {
+      var o = arr[i];
+      if (isObj && o) {
+        found = true;
+        for (var key in forThis) {
+          if (o[key] !== forThis[key]) {
+            found = false;
+            break;
+          }
+        }
+      } else {
+        found = o === forThis;
+      }
+      if (found) {
+        return o;
+      }
+    }
+  };
+
+  Utils.prototype.getLocal = function(key) {
+    if (typeof Storage === 'undefined') return;
+    var item = localStorage.getItem(key);
+    item = item ? JSON.parse(item) : {'value': item};
+    return item.value;
+  };
+
+  Utils.prototype.setLocal = function(key, value) {
+    if (typeof Storage === 'undefined') return;
+    if (typeof value !== 'null' && typeof value !== 'undefined') {
+      value = {
+        'type': this.typeof(value),
+        'value': value
+      };
+    }
+    value ? localStorage.setItem(key, JSON.stringify(value)) : localStorage.removeItem(key);
+  };
+
   return singleton.create(Utils);
 });

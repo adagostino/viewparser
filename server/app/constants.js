@@ -25,6 +25,7 @@ $require('constants',['extend', 'utils', 'zmq', 'observer'], function(extend, ut
   };
 
   Constants.prototype.start = function() {
+    console.log('Starting', this.__className);
     this._startResponder();
   };
 
@@ -45,7 +46,8 @@ $require('constants',['extend', 'utils', 'zmq', 'observer'], function(extend, ut
     console.log('Requester for (', this.__className, ':', process.pid, ') connected to: ', tcp);
   };
 
-  Constants.prototype._onProcessExit = function() {
+  Constants.prototype._onProcessExit = function(code) {
+    process && console.log('Process for (', this.__className, ':', process.pid, ') exited with code: ', code);
     this.requester && this.requester.close();
     this.responder && this.responder.close();
     this.requester = this.responder = null;

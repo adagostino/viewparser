@@ -1,4 +1,4 @@
-$require('endpoint', ['extend', 'zmq', 'os', 'req', 'messenger'], function(extend, zmq, os, ReqWrapper, Messenger) {
+$require('endpoint', ['extend', 'req', 'messenger'], function(extend, ReqWrapper, Messenger) {
 
   var Endpoint = function(){};
 
@@ -27,6 +27,7 @@ $require('endpoint', ['extend', 'zmq', 'os', 'req', 'messenger'], function(exten
     this._wrapListener('delete');
   };
 
+  // http://expressjs.com/en/api.html#req.body
   var id = 0;
   Endpoint.prototype._wrapListener = function(type) {
     var fn = this.tcp ? function(req, res) {
@@ -44,11 +45,19 @@ $require('endpoint', ['extend', 'zmq', 'os', 'req', 'messenger'], function(exten
       }
 
       this.requester.send(JSON.stringify({
-        'type': type,
-        'id': id,
-        'req': tempReq
+        'data': {
+          'type': type,
+          'id': id,
+          'req': tempReq
+        }
       }));
-    } : this[type];
+
+    } : function(req, res) {
+      // Wrap the request to parity Express req methods.
+      req = new ReqWrapper(req);
+      // call get/put/post/delete/whatever
+      this[type] && this[type](req, res);
+    };
     // Following line means: this.app('get', '/', function(req, res){});
     this.app[type](this.url, fn.bind(this));
   };
@@ -56,7 +65,7 @@ $require('endpoint', ['extend', 'zmq', 'os', 'req', 'messenger'], function(exten
   Endpoint.prototype.onResponse = function(data) {
     // Called on the Master when a response is gotten.
     this._super(data);
-    var response = JSON.parse(data),
+    var response = JSON.parse(data).data,
         id = parseInt(response.id);
     var resReq = this._reqMap[id];
     this._reqMap[id] = null;
@@ -72,21 +81,22 @@ $require('endpoint', ['extend', 'zmq', 'os', 'req', 'messenger'], function(exten
   };
 
   // Slave
-
-  Endpoint.prototype.onRequest = function(data) {
+  Endpoint.prototype.onMessage = function(data) {
     this._super(data);
-    var request = JSON.parse(data);
+    var request = data;
     var type = request.type.toLowerCase();
     var responder = this.responder;
     // Create a really basic 'response' object that has 'send' so that the end user doesn't care if it's Express
     // or a micro service.
     var res = {
-      'send': function(data) {
-          responder.send(JSON.stringify({
+      'send': function (data) {
+        responder.send(JSON.stringify({
+          'data': {
             'type': request.type,
             'id': request.id,
             'data': data
-          }));
+          }
+        }));
       }
     };
     // Wrap the request to parity Express req methods.

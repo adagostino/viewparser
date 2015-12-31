@@ -1,11 +1,30 @@
-$require('portStore', ['extend', 'singleton', 'constants'], function(extend, singleton, Constants) {
+$require('portStore',
+[
+  'extend',
+  'singleton',
+  'config',
+  'blackList',
+  'constants'
+],
+function(
+  extend,
+  singleton,
+  config,
+  BlackList,
+  Constants
+) {
+  // Redis cluster starts at 30001.
+  var _defaultPortRange = {'min': config.ports.range.min, 'max': config.ports.range.max};
+
   var PortStore = function(){};
 
   PortStore.prototype.init = function() {
-    this.port = 3001;
     this.numPortsUsed = 0;
-    this._minPort = 5000;
-    this._maxPort = 25000;
+    this._minPort = _defaultPortRange.min;
+    this._maxPort = _defaultPortRange.max;
+    this._blacklist = new BlackList(this._minPort, this._maxPort);
+    this.port = 3001;
+    this._addPortToMap(this.port);
 
     this._prefix = '__port__::';
     this._super();
@@ -23,18 +42,29 @@ $require('portStore', ['extend', 'singleton', 'constants'], function(extend, sin
     if (this._isPortKey(key) && value === 0) this.numPortsUsed--;
   };
 
-  PortStore.prototype._getOpenPort = function() {
-    if (this.numPortsUsed >= (this._maxPort - this._minPort)) return null;
-    var port = this._minPort + Math.floor(Math.random()*(this._maxPort - this._minPort)),
-        key = this._getKeyName(port);
+  PortStore.prototype._numPortsLeft = function() {
+    return this._maxPort - this._minPort - this._blacklist.length - this.numPortsUsed;
+  };
 
+  PortStore.prototype._getRandomPort = function() {
+    var port = this._minPort + Math.floor(Math.random()*(this._maxPort - this._minPort));
+    return this._blacklist.contains(port) ? this._getRandomPort() : port;
+  };
+
+  PortStore.prototype._addPortToMap = function(port) {
+    var key = this._getKeyName(port);
     if (!this._map[key]) {
       this._map[key] = 1;
       this.numPortsUsed++;
-      return port;
-    } else {
-      return this._getOpenPort();
+      return true;
     }
+    return false;
+  };
+
+  PortStore.prototype._getOpenPort = function() {
+    if (!this._numPortsLeft()) return null;
+    var port = this._getRandomPort();
+    return this._addPortToMap(port) ? port : this._getOpenPort();
   };
 
   PortStore.prototype._isPortKey = function(key) {

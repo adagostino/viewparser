@@ -1,0 +1,6 @@
+.controller-video {
+  min-height: inherit;
+}
+.controller-video [directive-video-call] {
+  min-height: inherit;
+}
