@@ -96,9 +96,9 @@ function(
     if (this._controllers[socket]) this.disconnectFromKurento(message);
     //this.connectToLoop(message);
     //this.connectToMirror(message);
-    //this.connectToConference(message);
+    this.connectToConference(message);
     //this.connectToBroadcast(message);
-    this.connectToPresentation(message);
+    //this.connectToPresentation(message);
   };
 
   Kurento.prototype.connectToLoop = function(message) {

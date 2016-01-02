@@ -2,6 +2,7 @@ $require('blackList', ['extend', 'config', 'observer'], function(extend, config,
   var _blacklistArray = [
     config.serverPort || 3000, // Server
     config.socketPort || 3002, // Socket port
+    config.socketIoPort || 3003, // Socket Io Server Port
     3478, // TURN Server
     5060, // Freeswitch default port
     5080, // Freeswitch external connections

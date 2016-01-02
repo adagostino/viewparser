@@ -2,6 +2,7 @@
   "site": "http://localhost:3000/",
   "serverPort": 3000,
   "socketPort": 3002,
+  "socketIoPort": 3003,
   "index": "client/index.html",
   "relative": ".",
   "both": {
@@ -157,7 +158,7 @@
     }
   },
   "kurento": {
-    "servicePort": 8443,
+    "servicePort": 3004,
     "wsPort": 8888,
     "ws": "ws://kurento.naar.io"
   },

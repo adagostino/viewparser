@@ -2,7 +2,7 @@ $app.require('modelSocket', ['utils', 'model'], function(utils, Model) {
   var Socket = function(){};
 
   Socket.prototype.init = function() {
-    var x = location.protocol + '//' + location.hostname + ':3002';
+    var x = location.protocol + '//' + location.hostname + ':3003';
     this._socket = io.connect(x, {'forceNew' : true , 'multiplex': false});
     this._socket.on('connect', this.$callback(this._onConnect));
     this._socket.on('disconnect', this.$callback(this._onDisconnect));

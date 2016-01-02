@@ -1,4 +1,5 @@
 // https://www.linode.com/docs/security/securing-your-server
+// sudo apt-get install iptables-persistent
 
 var _basePath = '/tmp/';
 var confFile = 'v4';
@@ -49,7 +50,7 @@ ipHelper.createConfFile = function(node) {
   contents.push('# Reject all traffic forwarding.');
   contents.push('-A FORWARD -j REJECT');
 
-  contents.push('COMMIT');
+  contents.push('COMMIT\n');
   return contents.join('\n');
 };
 
@@ -111,8 +112,7 @@ var getOpenPortCommand = function(proto, range) {
 // Overwrite the getServerStartCommand fn.
 ipHelper.getServerStartCommand = function(node) {
   var path = _basePath + confFile;
-  return 'sudo rm ' + path;
-  return 'sudo iptables-restore < ' + path + ' && sudo rm ' + path;
+  return 'sudo iptables-restore < ' + path + ' && sudo rm ' + path + ' && sudo apt-get install iptables-persistent';
 };
 
 // MAIN //

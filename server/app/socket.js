@@ -42,7 +42,7 @@ function(
 
   Socket.prototype._setupIo = function() {
     //this.io = socketIo(this.server); // this.port
-    this.io = socketIo(this.port);
+    this.io = socketIo(config.socketIoPort);
     this.io.adapter(socketIoRedis(redis.getPubSub()));
     this.io.on('connection', this.onConnection.bind(this));
   };

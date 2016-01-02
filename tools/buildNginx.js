@@ -88,6 +88,7 @@ var _buildLocation = function(opts, domain, ssl) {
 var _buildCache = function() {
   var contents = [];
   contents.push('location ~* ^.+\\.(?:css|cur|js|jpe?g|gif|htc|ico|png|html|xml|otf|ttf|eot|woff|svg)$ {');
+  contents.push('  root ' + _baseDocRoot + 'naar');
   contents.push('  access_log off;');
   contents.push('  expires 30d;');
   contents.push('  tcp_nodelay off;');
